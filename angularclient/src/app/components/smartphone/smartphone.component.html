@@ -1,0 +1,104 @@
+<div class="max-w-5xl mx-auto p-6 space-y-8">
+
+  <h1 class="text-3xl font-semibold text-gray-800 pb-3">
+    Smartphone-Verwaltung
+  </h1>
+
+  <!-- Registrierung -->
+  <section class="bg-white shadow-sm rounded-2xl p-6 border border-gray-100">
+    <h2 class="text-xl font-medium text-gray-700 mb-4">Registrieren</h2>
+
+    <form (ngSubmit)="register()" class="grid md:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Device ID</label>
+        <input [(ngModel)]="regDeviceId" name="regDeviceId"
+               class="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               required />
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">User Name</label>
+        <input [(ngModel)]="regUserName" name="regUserName"
+               class="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               required />
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Secret Hash</label>
+        <input [(ngModel)]="regSecretHash" name="regSecretHash"
+               class="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               required />
+      </div>
+
+      <div class="md:col-span-3">
+        <button type="submit"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow transition">
+          Registrieren
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Hash anfordern -->
+  <section class="bg-white shadow-sm rounded-2xl p-6 border border-gray-100">
+    <h2 class="text-xl font-medium text-gray-700 mb-4">Hash abrufen</h2>
+    <form (ngSubmit)="requestHash()" class="grid md:grid-cols-3 gap-4">
+      <div class="md:col-span-2">
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Smartphone auswählen</label>
+        <select [(ngModel)]="selectedSmartphone1" name="selectedSmartphone1"
+                class="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option [ngValue]="null">-- auswählen --</option>
+          <option *ngFor="let s of phones" [ngValue]="s">
+            {{ s.userName }} – {{ s.deviceId }}
+          </option>
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <button type="submit"
+                class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow transition">
+          Hash abrufen
+        </button>
+      </div>
+    </form>
+
+    <div *ngIf="getHash"
+         class="mt-4 bg-gray-50 border-l-4 border-blue-600 p-3 rounded text-sm font-mono text-gray-800">
+      <span class="font-semibold">Secret Hash:</span> {{ lastHash }}
+    </div>
+
+  </section>
+
+  <!-- Authentifizierung -->
+  <section class="bg-white shadow-sm rounded-2xl p-6 border border-gray-100">
+    <h2 class="text-xl font-medium text-gray-700 mb-4">Token anfordern</h2>
+
+    <form (ngSubmit)="requestToken()" class="grid md:grid-cols-3 gap-4">
+      <div class="md:col-span-2">
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Smartphone auswählen</label>
+        <select [(ngModel)]="selectedSmartphone" name="selectedSmartphone"
+                class="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option [ngValue]="null">-- auswählen --</option>
+          <option *ngFor="let s of phones" [ngValue]="s">
+            {{ s.deviceId }}
+          </option>
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <button type="submit"
+                class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow transition">
+          Token anfordern
+        </button>
+      </div>
+
+    </form>
+
+    <div *ngIf="authToken"
+         class="mt-4 bg-gray-50 border-l-4 border-blue-600 p-3 rounded text-sm font-mono text-gray-800">
+      <span class="font-semibold">Auth Token:</span> {{ authToken }}
+    </div>
+  </section>
+
+
+</div>

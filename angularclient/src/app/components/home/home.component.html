@@ -1,0 +1,169 @@
+<!-- src/app/home/home.component.html -->
+<div class="max-w-5xl mx-auto p-8 space-y-8">
+  <div class="bg-white shadow-sm rounded-2xl p-8 border border-gray-100">
+    <h1 class="text-4xl font-semibold text-gray-800 mb-4 text-center">
+      Willkommen beim <span class="text-blue-600">Management Interface</span>
+    </h1>
+
+    <p class="text-gray-600 leading-relaxed">
+      <br />
+      Dieses Dashboard dient zur Verwaltung von Smartphones und RCUs (Rexroth Connectivity Unit)
+      innerhalb des Keyless-Access-Systems.
+      <br />
+      Hier können Geräte registriert, authentifiziert und verknüpft werden.
+    </p>
+
+    <p class="text-gray-500 text-sm mt-8">
+      Entwickelt als Cloud-Verwaltungssystem für Keyless Access - Version 1.0
+    </p>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-8">
+    <!-- Smartphones -->
+    <section class="bg-white shadow-sm rounded-2xl p-6 border border-gray-100">
+      <h2 class="text-xl font-medium text-gray-800 mb-4">Smartphones</h2>
+      <div class="overflow-x-auto">
+        <table *ngIf="smartphones?.length" class="w-full text-sm text-left border-t border-gray-200">
+          <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
+          <tr>
+            <th class="px-4 py-2">ID</th>
+            <th class="px-4 py-2">Device ID</th>
+            <th class="px-4 py-2">User</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">Last Seen</th>
+            <th class="px-4 py-2">Aktionen</th>
+          </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let s of smartphones" class="hover:bg-blue-50 transition">
+            <td class="px-4 py-2">{{ s.id }}</td>
+            <td class="px-4 py-2">{{ s.deviceId }}</td>
+            <td class="px-4 py-2">{{ s.userName }}</td>
+            <td class="px-4 py-2">{{ s.status }}</td>
+            <td class="px-4 py-2">{{ s.lastSeen || '—' }}</td>
+            <td class="px-4 py-2">
+              <button
+                (click)="deleteSmartphone(s.id!)"
+                class="text-red-600 hover:text-red-800 font-medium whitespace-nowrap px-2 py-1 rounded transition"
+              >
+                Löschen
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="!smartphones?.length && !loading" class="text-gray-500 italic mt-2">
+        Keine Smartphones vorhanden
+      </div>
+    </section>
+
+    <!-- Maschinen -->
+    <section class="bg-white shadow-sm rounded-2xl p-6 border border-gray-100">
+      <h2 class="text-xl font-medium text-gray-800 mb-4">Maschinen</h2>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left border-t border-gray-200 min-w-[600px]">
+          <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
+          <tr>
+            <th class="px-4 py-2">ID</th>
+            <th class="px-4 py-2">Name</th>
+            <th class="px-4 py-2">RCU-ID</th>
+            <th class="px-4 py-2">Ort</th>
+            <th class="px-4 py-2 text-right">Aktionen</th>
+          </tr>
+          </thead>
+
+          <tbody class="divide-y divide-gray-100">
+          <tr
+            *ngFor="let r of rcus"
+            class="hover:bg-blue-50 transition text-gray-700 align-middle"
+          >
+            <td class="px-4 py-2 whitespace-nowrap">{{ r.id }}</td>
+            <td class="px-4 py-2">{{ r.name }}</td>
+            <td class="px-4 py-2 whitespace-nowrap">{{ r.rcuId }}</td>
+            <td class="px-4 py-2">{{ r.location || '—' }}</td>
+            <td class="px-4 py-2 text-right">
+              <button
+                (click)="deleteRcu(r.id!)"
+                class="text-red-600 hover:text-red-800 font-medium whitespace-nowrap px-2 py-1 rounded transition"
+              >
+                Löschen
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div
+        *ngIf="!rcus?.length && !loading"
+        class="text-gray-500 italic mt-2 text-sm"
+      >
+        Keine RCUs vorhanden
+      </div>
+    </section>
+  </div>
+
+  <!-- Zuweisungen -->
+  <section class="bg-white shadow-sm rounded-2xl p-6 border border-gray-100 mt-8 w-full">
+    <h2 class="text-xl font-medium text-gray-800 mb-4">
+      Zuweisungen
+    </h2>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left border-t border-gray-200 min-w-[650px]">
+        <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
+        <tr>
+          <th class="px-4 py-2">Maschinenname</th>
+          <th class="px-4 py-2">RCU-ID</th>
+          <th class="px-4 py-2">Zugewiesene Smartphones</th>
+        </tr>
+        </thead>
+
+        <tbody class="divide-y divide-gray-100">
+        <tr
+          *ngFor="let a of assignments"
+          class="hover:bg-blue-50 transition text-gray-700 align-top"
+        >
+          <td class="px-4 py-2">{{ a.rcuName }}</td>
+          <td class="px-4 py-2 whitespace-nowrap font-medium">
+            {{ a.rcuId }}
+          </td>
+          <td class="px-4 py-2">
+
+            <ng-container *ngIf="a.smartphones.length; else none">
+              <ul class="list-inside">
+                <li *ngFor="let s of a.smartphones">
+                  <div class="flex items-center gap-2">
+                  {{ s.deviceId }} - {{ s.userName }}
+                  <button
+                    class="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+                    (click)="unassign(a.rcuId!, s.id!)"
+                  >
+                    Unassign
+                  </button>
+                  </div>
+                </li>
+              </ul>
+            </ng-container>
+
+            <ng-template #none>
+              <div class="flex items-center gap-2">
+                <span class="text-gray-500 italic">Keine Smartphones zugewiesen</span>
+                <button
+                  class="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+                  (click)="openAssignPage(a.rid!, a.rcuName!)"
+                >
+                  Assign
+                </button>
+              </div>
+            </ng-template>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>

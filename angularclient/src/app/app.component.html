@@ -1,0 +1,58 @@
+<div class="flex h-screen bg-gray-50 text-gray-800">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-lg flex flex-col">
+    <!-- Oberer Bereich -->
+    <div class="p-6 flex-1">
+      <div class="mb-8">
+        <!-- Titel + Icon -->
+        <div class="flex items-center gap-2">
+          <img src="cloud-icon.png" alt="Keyless Icon" class="w-7 h-7 relative top-[1px]" />
+          <h2 class="text-2xl font-bold text-blue-600">Keyless Cloud</h2>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="space-y-2">
+        <a
+          routerLink="/home"
+          routerLinkActive="bg-blue-50 text-blue-600"
+          class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 transition"
+        >
+          <span class="font-medium">Home</span>
+        </a>
+
+        <a
+          routerLink="/smartphone"
+          routerLinkActive="bg-blue-50 text-blue-600"
+          class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 transition"
+        >
+          <span class="font-medium">Smartphones</span>
+        </a>
+
+        <a
+          routerLink="/maschine"
+          routerLinkActive="bg-blue-50 text-blue-600"
+          class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 transition"
+        >
+          <span class="font-medium">Maschinen</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Logos + Copyright (am unteren Rand fixiert) -->
+    <div class="p-4 border-t border-gray-100">
+      <div class="flex justify-center gap-3 mb-3">
+        <img src="Logo_of_Bosch_Rexroth_AG.png" alt="Rexroth Logo" class="h-9 object-contain" />
+        <img src="HKA2.jpeg" alt="HKA Logo" class="h-14 object-contain" />
+      </div>
+      <div class="text-center text-sm text-gray-500">
+        © 2025 Bosch Rexroth AG
+      </div>
+    </div>
+  </aside>
+
+  <!-- Hauptinhalt -->
+  <main class="flex-1 overflow-y-auto p-8">
+    <router-outlet></router-outlet>
+  </main>
+</div>

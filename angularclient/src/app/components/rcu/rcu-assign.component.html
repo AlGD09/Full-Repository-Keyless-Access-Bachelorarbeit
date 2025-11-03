@@ -1,0 +1,34 @@
+<div class="max-w-3xl mx-auto p-6 space-y-8">
+  <h1 class="text-3xl font-semibold text-gray-800 pb-3">
+    Smartphone zuweisen
+  </h1>
+
+  <p class="text-gray-600">Maschine: <strong>{{ rcuName }}</strong></p>
+
+  <section class="bg-white shadow-sm rounded-2xl p-6 border border-gray-100">
+    <form (ngSubmit)="assign()" class="grid md:grid-cols-2 gap-4">
+      <div class="md:col-span-2">
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Smartphone auswählen</label>
+        <select [(ngModel)]="selectedSmartphoneId" name="selectedSmartphoneId"
+                class="w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option [ngValue]="null">-- auswählen --</option>
+          <option *ngFor="let s of smartphones" [ngValue]="s.id">
+            {{ s.userName }} – {{ s.deviceId }}
+          </option>
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <button type="submit"
+                class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow transition">
+          Zuweisen
+        </button>
+      </div>
+    </form>
+
+    <div *ngIf="message"
+         class="mt-4 text-sm text-blue-700 bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+      {{ message }}
+    </div>
+  </section>
+</div>
