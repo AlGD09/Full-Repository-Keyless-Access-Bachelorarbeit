@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -25,9 +27,16 @@ public class RCU {
     private LocalDateTime registeredAt;
 
     // Beziehung: jede RCU kann einem Smartphone zugeordnet sein
-    @ManyToOne
-    @JoinColumn(name = "smartphone_id")
-    private Smartphone assignedSmartphone;
+    //@ManyToOne
+    //@JoinColumn(name = "smartphone_id")
+    @ManyToMany
+    @JoinTable(
+            name = "rcu_smartphones",
+            joinColumns = @JoinColumn(name = "rcu_id"),
+            inverseJoinColumns = @JoinColumn(name = "smartphone_id")
+    )
+
+    private Set<Smartphone> allowedSmartphones = new HashSet<>();
 
     //@OneToMany
     //@JoinColumn(name = "rcu_id")
@@ -54,12 +63,22 @@ public class RCU {
     public LocalDateTime getRegisteredAt() { return registeredAt; }
     public void setRegisteredAt(LocalDateTime registeredAt) { this.registeredAt = registeredAt; }
 
-    public Smartphone getAssignedSmartphone() { return assignedSmartphone; }
-    public void setAssignedSmartphone(Smartphone assignedSmartphone) { this.assignedSmartphone = assignedSmartphone; }
+    //public Smartphone getAssignedSmartphone() { return assignedSmartphone; }
+    //public void setAssignedSmartphone(Smartphone assignedSmartphone) { this.assignedSmartphone = assignedSmartphone; }
 
-    public void unassignSmartphone() { this.assignedSmartphone = null; }
+    public Set<Smartphone> getAllowedSmartphones() { return allowedSmartphones; }
+    public void setAllowedSmartphones(Set<Smartphone> allowedSmartphones) { this.allowedSmartphones = allowedSmartphones; }
 
-    public boolean hasAssignedSmartphone() { return this.assignedSmartphone != null; }
+    public void addSmartphone(Smartphone smartphone) {
+        this.allowedSmartphones.add(smartphone);
+    }
+    public void removeSmartphone(Smartphone smartphone) {
+        this.allowedSmartphones.remove(smartphone);
+    }
+
+    //public void unassignSmartphone() { this.assignedSmartphone = null; }
+
+    //public boolean hasAssignedSmartphone() { return this.assignedSmartphone != null; }
 
 
 }

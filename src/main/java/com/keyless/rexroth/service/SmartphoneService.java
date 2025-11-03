@@ -124,6 +124,7 @@ public class SmartphoneService {
     }
 
     public void deleteSmartphone(Long id) {
+        Smartphone smartphone = smartphoneRepository.findById(id).orElse(null);
         if (smartphoneRepository.existsById(id)) {
 
             // Alle RCUs abrufen
@@ -131,11 +132,10 @@ public class SmartphoneService {
 
             // Prüfen, ob eine RCU das Smartphone zugewiesen hat
             for (RCU rcu : rcuList) {
-                if (rcu.getAssignedSmartphone() != null &&
-                        rcu.getAssignedSmartphone().getId().equals(id)) {
+                if (rcu.getAllowedSmartphones().contains(smartphone)) {
 
                     // Smartphone-Zuweisung aufheben
-                    rcu.unassignSmartphone();
+                    rcu.removeSmartphone(smartphone);
                     rcuRepository.save(rcu); // Änderung speichern
                 }
             }
@@ -145,7 +145,7 @@ public class SmartphoneService {
         }
     }
 
-    public void unassignSmartphone(String rcuId, Long smartphoneId) {
+    public void removeSmartphone(String rcuId, Long smartphoneId) {
         RCU rcu = rcuRepository.findByRcuId(rcuId);
         if (rcu == null) {
             throw new RuntimeException("RCU not found: " + rcuId);
@@ -157,10 +157,10 @@ public class SmartphoneService {
         }
 
         // Zuordnung sicher prüfen, bevor unassigned wird
-        if (rcu.getAssignedSmartphone() != null &&
-                rcu.getAssignedSmartphone().getId().equals(phone.getId())) {
+        if (rcu.getAllowedSmartphones() != null &&
+                rcu.getAllowedSmartphones().contains(phone)) {
 
-            rcu.unassignSmartphone();
+            rcu.removeSmartphone(phone);
             rcuRepository.save(rcu);
         }
     }
@@ -175,8 +175,8 @@ public class SmartphoneService {
         List<RCU> assignedrcus = new ArrayList<>();
 
         for (RCU rcu : rcuList) {
-            if (rcu.getAssignedSmartphone() != null &&
-                    rcu.getAssignedSmartphone().getDeviceId().equals(smartphoneId)) {
+            if (rcu.getAllowedSmartphones() != null &&
+                    rcu.getAllowedSmartphones().contains(existing)) {
                 assignedrcus.add(rcu);
             }
         }

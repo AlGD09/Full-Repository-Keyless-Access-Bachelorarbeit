@@ -24,12 +24,12 @@ getAllRcus(): Observable<Rcu[]> {
     return this.http.get<Rcu[]>(`${this.baseUrl}/list`);
 }
 
-assignSmartphone(rcuId: number, smartphoneId: number): Observable<Rcu> {
-    return this.http.post<Rcu>(`${this.baseUrl}/assign`, { rcuId, smartphoneId });
+assignSmartphones(rcuId: number, smartphoneIds: number[]): Observable<Rcu> {
+    return this.http.post<Rcu>(`${this.baseUrl}/assign/smartphones`, { rcuId, smartphoneIds });
 }
 
-getAssignedSmartphone(rcuId: string): Observable<Smartphone> {
-    return this.http.get<Smartphone>(`${this.baseUrl}/${rcuId}/smartphones`);
+getAssignedSmartphones(rcuId: string): Observable<Smartphone[]> {
+  return this.http.get<Smartphone[]>(`${this.baseUrl}/${rcuId}/smartphones`);
 }
 
 deleteRcu(id: number) {

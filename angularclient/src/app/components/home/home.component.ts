@@ -57,10 +57,10 @@ export class HomeComponent {
         this.assignments = [];
               this.rcus.forEach(rcu => {
                 if (rcu.id) {
-                  this.rcuService.getAssignedSmartphone(rcu.rcuId).subscribe({
-                    next: (smartphone: Smartphone | null) => {
+                  this.rcuService.getAssignedSmartphones(rcu.rcuId).subscribe({
+                    next: (smartphones: Smartphone[]) => {
                       // Prüfen, ob gültiges Smartphone-Objekt vorhanden ist
-                      const assigned = smartphone && smartphone.deviceId ? [smartphone] : [];
+                      const assigned = smartphones ?? [];
                       this.assignments.push({
                         rid: rcu.id ?? 0,
                         rcuId: rcu.rcuId || '–',
@@ -116,8 +116,8 @@ export class HomeComponent {
     this.router.navigate(['/maschine/assign'], { queryParams: { id: id, name: name } });
   }
 
-  unassign(rcuId: string, smartphoneId: number): void{
-    this.smartphoneService.unassignSmartphone(rcuId, smartphoneId).subscribe({
+  removeSmartphone(rcuId: string, smartphoneId: number): void{
+    this.smartphoneService.removeSmartphone(rcuId, smartphoneId).subscribe({
       next: () => {
         this.loadData(); // Nach dem Löschen neu laden
       },

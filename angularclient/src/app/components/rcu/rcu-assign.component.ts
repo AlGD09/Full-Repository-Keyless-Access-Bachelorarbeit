@@ -18,7 +18,7 @@ export class RcuAssignComponent implements OnInit {
   rcuId!: number;
   rcuName = '';
   smartphones: Smartphone[] = [];
-  selectedSmartphoneId: number | null = null;
+  selectedSmartphoneIds: number[] = [];
   message = '';
 
   constructor(
@@ -41,12 +41,12 @@ export class RcuAssignComponent implements OnInit {
   }
 
   assign(): void {
-    if (!this.selectedSmartphoneId) {
-      this.message = 'Bitte ein Smartphone auswählen.';
+    if (!this.selectedSmartphoneIds || this.selectedSmartphoneIds.length === 0) {
+      this.message = 'Bitte mindestens ein Smartphone auswählen.';
       return;
     }
 
-    this.rcuService.assignSmartphone(this.rcuId, this.selectedSmartphoneId).subscribe({
+    this.rcuService.assignSmartphones(this.rcuId, this.selectedSmartphoneIds).subscribe({
       next: _ => {
         this.message = 'Smartphone erfolgreich zugewiesen!';
         setTimeout(() => this.router.navigate(['/home']), 1200);

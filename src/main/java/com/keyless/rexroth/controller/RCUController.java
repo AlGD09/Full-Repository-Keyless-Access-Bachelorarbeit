@@ -31,11 +31,11 @@ public class RCUController {
         return ResponseEntity.ok(rcu);
     }
 
-    @PostMapping("/assign")
-    public ResponseEntity<?> assignSmartphone(@RequestBody RCUAssignDTO dto) {
-        RCU updated = rcuService.assignSmartphone(dto.getRcuId(), dto.getSmartphoneId());
+    @PostMapping("/assign/smartphones")
+    public ResponseEntity<?> assignSmartphones(@RequestBody RCUAssignDTO dto) {
+        RCU updated = rcuService.assignSmartphones(dto.getRcuId(), dto.getSmartphoneIds());
         if (updated == null)
-            return ResponseEntity.badRequest().body("Fehler: RCU oder Smartphone nicht gefunden.");
+            return ResponseEntity.badRequest().body("Fehler: RCU oder Smartphone(s) nicht gefunden.");
         return ResponseEntity.ok(updated);
     }
 
@@ -45,17 +45,17 @@ public class RCUController {
     }
 
     @GetMapping("/{rcuId}/smartphones")
-    public ResponseEntity<?> getAssignedSmartphone(@PathVariable String rcuId) {
+    public ResponseEntity<?> getAssignedSmartphones(@PathVariable String rcuId) {
         RCU rcu = rcuService.getRcuByRcuId(rcuId);
         if (rcu == null) {
             return ResponseEntity.status(404).body("RCU nicht gefunden");
         }
 
-        if (rcu.getAssignedSmartphone() == null) {
+        if (rcu.getAllowedSmartphones() == null) {
             return ResponseEntity.ok("Keine Smartphones zugewiesen");
         }
 
-        return ResponseEntity.ok(rcu.getAssignedSmartphone());
+        return ResponseEntity.ok(rcu.getAllowedSmartphones());
     }
 
     @DeleteMapping("/delete/{id}")

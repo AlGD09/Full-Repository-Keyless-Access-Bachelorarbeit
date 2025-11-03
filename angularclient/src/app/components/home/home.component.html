@@ -133,13 +133,13 @@
           <td class="px-4 py-2">
 
             <ng-container *ngIf="a.smartphones.length; else none">
-              <ul class="list-inside">
+              <ul class="list-inside space-y-1">
                 <li *ngFor="let s of a.smartphones">
                   <div class="flex items-center gap-2">
                   {{ s.deviceId }} - {{ s.userName }}
                   <button
                     class="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
-                    (click)="unassign(a.rcuId!, s.id!)"
+                    (click)="removeSmartphone(a.rcuId!, s.id!)"
                   >
                     Unassign
                   </button>
@@ -149,16 +149,16 @@
             </ng-container>
 
             <ng-template #none>
-              <div class="flex items-center gap-2">
                 <span class="text-gray-500 italic">Keine Smartphones zugewiesen</span>
-                <button
-                  class="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
-                  (click)="openAssignPage(a.rid!, a.rcuName!)"
-                >
-                  Assign
-                </button>
-              </div>
             </ng-template>
+          </td>
+
+          <td class="px-4 py-2 text-right">
+            <button
+              class="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+              (click)="openAssignPage(a.rid!, a.rcuName!)">
+              Assign
+            </button>
           </td>
         </tr>
         </tbody>

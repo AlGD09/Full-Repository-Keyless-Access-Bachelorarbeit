@@ -6,5 +6,5 @@ export interface Rcu {
   name: string;
   location: string;
   registeredAt?: string;
-  smartphones?: Smartphone;
+  smartphones?: Smartphone[];
 }

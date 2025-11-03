@@ -75,9 +75,9 @@ public class SmartphoneController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/unassign")
-    public ResponseEntity<Void> unassignSmartphone(@RequestBody SmartphoneUnassignDTO dto) {
-        smartphoneService.unassignSmartphone(dto.getRcuId(), dto.getSmartphoneId());
+    @PostMapping("/remove/smartphone")
+    public ResponseEntity<Void> removeSmartphone(@RequestBody SmartphoneUnassignDTO dto) {
+        smartphoneService.removeSmartphone(dto.getRcuId(), dto.getSmartphoneId());
         return ResponseEntity.noContent().build();
     }
 

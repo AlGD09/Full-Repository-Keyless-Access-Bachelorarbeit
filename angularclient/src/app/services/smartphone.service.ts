@@ -33,8 +33,8 @@ deleteSmartphone(id: number) {
   return this.http.delete(`${this.baseUrl}/delete/${id}`);
 }
 
-unassignSmartphone(rcuId: string, smartphoneId: number) {
-  return this.http.post(`${this.baseUrl}/unassign`, { rcuId, smartphoneId });
+removeSmartphone(rcuId: string, smartphoneId: number) {
+  return this.http.post(`${this.baseUrl}/remove/smartphone`, { rcuId, smartphoneId });
 }
 
 

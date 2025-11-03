@@ -36,21 +36,16 @@ public class RCUService {
         return rcuRepository.findAll();
     }
 
-    public RCU assignSmartphone(Long rcuId, Long smartphoneId) {
+    public RCU assignSmartphones(Long rcuId, List<Long> smartphoneIds) {
         RCU rcu = rcuRepository.findById(rcuId).orElse(null);
-        Smartphone smartphone = smartphoneRepository.findById(smartphoneId).orElse(null);
+        if (rcu == null) return null;
 
-        if (rcu == null || smartphone == null) {
-            return null;
+        for (Long smartphoneId : smartphoneIds) {
+            Smartphone smartphone = smartphoneRepository.findById(smartphoneId).orElse(null);
+            if (smartphone != null && !rcu.getAllowedSmartphones().contains(smartphone)) {
+                rcu.addSmartphone(smartphone);
+            }
         }
-
-        // Alte Zuordnung entfernen, falls ein anderes Smartphone bereits zugewiesen ist
-        if (rcu.getAssignedSmartphone() != null && !rcu.getAssignedSmartphone().getId().equals(smartphoneId)) {
-            System.out.println("Alte Smartphone-Zuweisung wird überschrieben für RCU " + rcu.getRcuId());
-        }
-
-
-        rcu.setAssignedSmartphone(smartphone);
         return rcuRepository.save(rcu);
     }
 

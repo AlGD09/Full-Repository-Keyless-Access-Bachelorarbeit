@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { RcuService } from '../../services/rcu.service';
 import { SmartphoneService } from '../../services/smartphone.service';
 import { Rcu } from '../../model/rcu';
-
+import { Smartphone } from '../../model/smartphone';
 
 @Component({
   selector: 'app-rcu',
@@ -57,12 +57,12 @@ export class RcuComponent {
 
         this.rcus.forEach(rcu => {
           if (rcu.id) {
-            this.rcuService.getAssignedSmartphone(rcu.rcuId).subscribe({
-              next: (smartphone) => {
-                rcu.smartphones = smartphone; //
+            this.rcuService.getAssignedSmartphones(rcu.rcuId).subscribe({
+              next: (smartphones: Smartphone[]) => {
+                rcu.smartphones = smartphones ?? []; // asignar lista completa
               },
               error: () => {
-                rcu.smartphones = undefined; // Kein Problem, wenn keine Zuordnung existiert
+                rcu.smartphones = []; // Kein Problem, wenn keine Zuordnung existiert
               }
             });
           }
