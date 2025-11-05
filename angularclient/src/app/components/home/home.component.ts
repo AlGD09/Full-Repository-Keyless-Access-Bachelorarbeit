@@ -7,11 +7,15 @@ import { UserService } from '../../services/user.service';
 import { Smartphone } from '../../model/smartphone';
 import { Rcu } from '../../model/rcu';
 import { User } from '../../model/user';
+import { CascadeGraphComponent } from '../../components/graph/cascade-graph.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    CascadeGraphComponent
+  ],
   templateUrl: './home.component.html'
 })
 export class HomeComponent {
