@@ -42,7 +42,7 @@ public class CoresystemPocApplication {
             if (repo.count() == 0) {
                 Smartphone s = new Smartphone();
                 s.setDeviceId("9e4a6c41b203d8a7");
-                s.setName("Generic");
+                s.setName("Generic-phone");
                 //s.setSecretHash("cc03e747a6afbbcbf8be7668acfebee5");
                 //s.setUserName("Alejandro");
                 s.setStatus("inactive");
