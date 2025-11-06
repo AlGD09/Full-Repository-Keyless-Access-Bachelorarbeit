@@ -8,18 +8,32 @@ import { RcuAssignComponent } from './components/rcu/rcu-assign.component';
 import { HomeComponent } from './components/home/home.component';
 import { EinheitenComponent } from './components/einheiten/einheiten.component';
 import { ZuweisungenComponent } from './components/zuweisungen/zuweisungen.component';
-
+import { HomeLayoutComponent } from './layouts/home-layout/home-layout.component';
+import { SidebarLayoutComponent } from './layouts/sidebar-layout/sidebar-layout.component';
 
 export const routes: Routes = [
-  { path: 'home', component: HomeComponent },
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'user', component: UserComponent },
-  { path: 'smartphone', component: SmartphoneComponent },
-  { path: 'smartphone/assign', component: SmartphoneAssignComponent },
-  { path: 'maschine', component: RcuComponent},
-  { path: 'maschine/assign', component: RcuAssignComponent},
-  { path: 'einheiten', component: EinheitenComponent},
-  { path: 'zuweisungen', component: ZuweisungenComponent}
+  {
+    path: '',
+    component: HomeLayoutComponent,
+    children: [
+      { path: 'home', component: HomeComponent },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+    ],
+  },
+  {
+    path: '',
+    component: SidebarLayoutComponent,
+    children: [
+      { path: 'user', component: UserComponent },
+      { path: 'smartphone', component: SmartphoneComponent },
+      { path: 'smartphone/assign', component: SmartphoneAssignComponent },
+      { path: 'maschine', component: RcuComponent},
+      { path: 'maschine/assign', component: RcuAssignComponent},
+      { path: 'einheiten', component: EinheitenComponent},
+      { path: 'zuweisungen', component: ZuweisungenComponent}
+    ],
+  },
+
 ];
 
 // @NgModule({

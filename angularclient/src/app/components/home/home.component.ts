@@ -9,6 +9,7 @@ import { Rcu } from '../../model/rcu';
 import { User } from '../../model/user';
 import { CascadeGraphComponent } from '../../components/graph/cascade-graph.component';
 
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -40,6 +41,10 @@ export class HomeComponent {
     private router: Router
   ) {
     this.loadData();
+  }
+
+  goToUser() {
+    this.router.navigate(['/user']);
   }
 
   // Lädt beide Tabellen gleichzeitig
