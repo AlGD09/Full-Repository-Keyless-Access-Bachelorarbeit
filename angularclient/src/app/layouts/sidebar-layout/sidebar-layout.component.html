@@ -1,12 +1,10 @@
 <div
   class="flex h-screen bg-gray-50 text-gray-800"
-  (mouseenter)="isExpanded = true"
-  (mouseleave)="isExpanded = false"
 >
   <!-- Sidebar -->
   <aside
     class="group relative flex flex-col bg-white border-r border-gray-200 transition-all"
-    style="transition-duration: 3000;"
+    style="transition-duration: 0.3s;"
     [style.width]="isExpanded ? '16rem' : '6rem'"
     (mouseenter)="isExpanded = true"
     (mouseleave)="isExpanded = false"
@@ -119,7 +117,7 @@
     <div *ngIf="isExpanded" class="flex flex-col items-center border-t border-gray-100 p-4 space-y-2">
       <div class="flex items-center gap-2">
         <img src="Logo_of_Bosch_Rexroth_AG.png" alt="Rexroth Logo" class="h-8" />
-        <img src="HKA_horizontal.png" alt="HKA Logo" class="h-6" />
+        <img src="HKA_horizontal.png" alt="HKA Logo" class="h-5" />
       </div>
       <p class="text-xs text-gray-400">© 2025 Bosch Rexroth AG</p>
     </div>
