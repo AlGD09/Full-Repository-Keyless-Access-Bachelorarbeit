@@ -2,49 +2,57 @@
 
   <!-- Überschrift -->
   <div class="px-20 pt-10 pb-6">
-    <h1 class="text-4xl font-extrabold text-[#002B49]">Benutzer Übersicht</h1>
+    <h1 class="text-4xl font-extrabold text-[#002B49]">Maschinen Übersicht</h1>
     <p class="text-gray-600 leading-relaxed">
       <br />
-      Diese Sektion stellt eine Übersicht der registrierten Benutzer dar.
+      Diese Sektion stellt eine Übersicht der registrierten Maschinen dar.
       <br />
     </p>
   </div>
 
-
-  <!-- Users -->
+  <!-- Maschinen -->
   <div class="bg-white rounded-2xl px-20 pt-16 w-full">
-
     <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left border-t border-gray-200 min-w-[650px]">
+      <table class="w-full text-sm text-left border-t border-gray-200 min-w-[600px]">
         <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
         <tr>
           <th class="px-4 py-2">ID</th>
-          <th class="px-4 py-2">User Name</th>
-          <th class="px-4 py-2">Email</th>
-          <th class="px-4 py-2">Aktionen</th>
+          <th class="px-4 py-2">Name</th>
+          <th class="px-4 py-2">RCU-ID</th>
+          <th class="px-4 py-2">Ort</th>
+          <th class="px-4 py-2 text-left">Aktionen</th>
         </tr>
         </thead>
 
         <tbody class="divide-y divide-gray-100">
         <tr
-          *ngFor="let u of users"
+          *ngFor="let r of rcus"
           class="hover:bg-blue-50 transition text-gray-700 align-middle"
         >
-          <td class="px-4 py-2 whitespace-nowrap">{{ u.id }}</td>
-          <td class="px-4 py-2">{{ u.username }}</td>
-          <td class="px-4 py-2 whitespace-nowrap">{{ u.email }}</td>
+          <td class="px-4 py-2 whitespace-nowrap">{{ r.id }}</td>
+          <td class="px-4 py-2">{{ r.name }}</td>
+          <td class="px-4 py-2 whitespace-nowrap">{{ r.rcuId }}</td>
+          <td class="px-4 py-2">{{ r.location || '—' }}</td>
           <td class="px-4 py-2 text-left">
             <button
-              (click)="deleteUser(u.id!)"
+              (click)="deleteRcu(r.id!)"
               class="text-red-600 hover:text-red-800 font-medium whitespace-nowrap px-2 py-1 rounded transition"
             >
               Löschen
             </button>
           </td>
         </tr>
-
         </tbody>
       </table>
     </div>
+
+    <div
+      *ngIf="!rcus?.length && !loading"
+      class="text-gray-500 italic px-2 mt-2 text-sm"
+    >
+      Keine Maschinen vorhanden
+    </div>
   </div>
+
+
 </div>

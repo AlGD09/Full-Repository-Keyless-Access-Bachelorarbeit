@@ -1,23 +1,33 @@
-  <!-- Hauptbereich mit Top-Navigation -->
-  <div class="flex flex-col h-full">
-    <!-- Obere Navbar -->
-    <nav class="bg-white border-b border-gray-200 px-6 py-3 shadow-sm flex items-center space-x-4">
-      <a routerLink="./" routerLinkActive="text-blue-600 border-b-2 border-blue-600"
-         [routerLinkActiveOptions]="{ exact: true }"
-         class="flex items-center px-3 py-2 rounded-lg hover:bg-blue-50 transition">
-        <i class="fas fa-user w-5 text-gray-500"></i> Benutzer
-      </a>
-      <a routerLink="smartphones" routerLinkActive="text-blue-600 border-b-2 border-blue-600"
-         class="flex items-center px-3 py-2 rounded-lg hover:bg-blue-50 transition">
-        <i class="fas fa-mobile-screen w-5 text-gray-500"></i> Smartphones
-      </a>
-      <a routerLink="maschinen" routerLinkActive="text-blue-600 border-b-2 border-blue-600"
-         class="flex items-center px-3 py-2 rounded-lg hover:bg-blue-50 transition">
-        <i class="fas fa-gears w-5 text-gray-500"></i> Maschinen
-      </a>
-    </nav>
-    <!-- Inhalt -->
-    <main class="flex-1 overflow-y-auto p-6">
-      <router-outlet></router-outlet>
-    </main>
-  </div>
+<!-- Hauptbereich mit Top-Navigation -->
+<div class="flex flex-col h-full">
+  <!-- Obere Navbar -->
+  <nav class="bg-white flex justify-between px-4 py-3">
+    <a
+      routerLink="./"
+      routerLinkActive="text-blue-600 border-b-2 border-blue-600"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="flex items-center justify-center px-3 py-2 w-[30%] transition-all rounded-lg"
+    >
+      <i class="fas fa-user w-10 text-gray-500"></i> Benutzer
+    </a>
+    <a
+      routerLink="smartphones"
+      routerLinkActive="text-blue-600 border-b-2 border-blue-600"
+      class="flex items-center justify-center px-3 py-2 w-[30%] transition-all rounded-lg"
+    >
+      <i class="fas fa-mobile-screen w-10 text-gray-500"></i> Smartphones
+    </a>
+    <a
+      routerLink="maschinen"
+      routerLinkActive="text-blue-600 border-b-2 border-blue-600"
+      class="flex items-center justify-center px-3 py-2 w-[30%] transition-all rounded-lg"
+    >
+      <i class="fas fa-gear w-10 text-gray-500"></i> Maschinen
+    </a>
+  </nav>
+
+  <!-- Inhalt -->
+  <main class="flex-1 overflow-y-auto">
+    <router-outlet></router-outlet>
+  </main>
+</div>

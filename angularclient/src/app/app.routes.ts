@@ -11,6 +11,8 @@ import { ZuweisungenComponent } from './components/zuweisungen/zuweisungen.compo
 import { HomeLayoutComponent } from './layouts/home-layout/home-layout.component';
 import { SidebarLayoutComponent } from './layouts/sidebar-layout/sidebar-layout.component';
 import { EinheitenLayoutComponent } from './layouts/einheiten-layout/einheiten-layout.component';
+import { EinheitenSmartphonesComponent } from './components/einheiten/smartphones/einheiten-smartphones.component';
+import { EinheitenMaschinenComponent } from './components/einheiten/maschinen/einheiten-maschinen.component';
 
 export const routes: Routes = [
   {
@@ -33,8 +35,8 @@ export const routes: Routes = [
       { path: 'einheiten', component: EinheitenLayoutComponent,
         children: [
           { path: '', component: EinheitenComponent },
-          { path: 'smartphones', component: SmartphoneComponent },
-          { path: 'maschinen', component: RcuComponent },
+          { path: 'smartphones', component: EinheitenSmartphonesComponent },
+          { path: 'maschinen', component: EinheitenMaschinenComponent },
         ],
       },
       { path: 'zuweisungen', component: ZuweisungenComponent}

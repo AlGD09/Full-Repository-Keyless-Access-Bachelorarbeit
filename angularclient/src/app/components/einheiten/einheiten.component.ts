@@ -30,13 +30,13 @@ export class EinheitenComponent {
 
 
   constructor(
-      private smartphoneService: SmartphoneService,
-      private rcuService: RcuService,
-      private userService: UserService,
-      private router: Router
-    ) {
-      this.loadData();
-    }
+    private smartphoneService: SmartphoneService,
+    private rcuService: RcuService,
+    private userService: UserService,
+    private router: Router
+  ) {
+    this.loadData();
+  }
 
   // Lädt beide Tabellen gleichzeitig
   loadData(): void {
