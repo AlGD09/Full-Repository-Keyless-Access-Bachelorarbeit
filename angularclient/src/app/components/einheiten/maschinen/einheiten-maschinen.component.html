@@ -10,10 +10,74 @@
     </p>
   </div>
 
+  <!-- Maschinen-Karten -->
+  <div class="px-20 pb-10">
+    <div
+      *ngIf="rcus?.length; else noMachines"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+    >
+      <div
+        *ngFor="let r of rcus"
+        class="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 p-6 flex flex-col items-center text-center"
+      >
+        <!-- Symbol oben -->
+        <div class="bg-white shadow-sm rounded-lg p-14 mb-2">
+          <img
+            [src]="getMachineImage(r.name).src"
+            [ngClass]="getMachineImage(r.name).height"
+            alt="Maschinensymbol"
+          />
+        </div>
+
+        <!-- Name und ID -->
+        <div class="mb-3">
+          <h3 class="text-lg font-semibold text-[#002B49] leading-tight">
+            {{ r.name || 'Unbenannte Maschine'}}
+          </h3>
+          <p class="text-xs text-gray-500">ID: {{ r.id }}</p>
+        </div>
+
+        <!-- RCU-ID und Ort in einer Zeile -->
+        <div class="pt-1 grid grid-cols-2 gap-x-6 text-gray-600 text-center mb-4 divide-x divide-gray-300">
+          <!-- RCU-ID -->
+          <div class="px-2">
+            <div class="font-semibold text-gray-900">RCU-ID</div>
+            <div class="font-medium text-sm">{{ r.rcuId || '—' }}</div>
+          </div>
+
+          <!-- Ort -->
+          <div class="px-4">
+            <div class="font-semibold text-gray-900">Ort</div>
+            <div class="font-medium text-sm">{{ r.location || '—' }}</div>
+          </div>
+        </div>
+
+
+        <!-- Löschen-Button unten -->
+        <button
+          (click)="deleteRcu(r.id!)"
+          class="mt-auto text-red-700 hover:text-red-700 transition"
+          title="Löschen"
+        >
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Leerer Zustand -->
+    <ng-template #noMachines>
+      <div class="text-gray-500 italic mt-6 text-sm text-center">
+        Keine Maschinen vorhanden
+      </div>
+    </ng-template>
+  </div>
+
+  </div>
+
   <!-- Maschinen -->
   <div class="bg-white rounded-2xl px-20 pt-16 w-full">
     <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left border-t border-gray-200 min-w-[600px]">
+      <table class="w-full text-sm text-left border-t border-gray-200 min-w-[400px]">
         <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
         <tr>
           <th class="px-4 py-2">ID</th>
@@ -52,7 +116,4 @@
     >
       Keine Maschinen vorhanden
     </div>
-  </div>
-
-
 </div>

@@ -46,16 +46,32 @@ export class EinheitenMaschinenComponent {
     }
 
 
-      deleteRcu(id: number): void {
-        if (confirm('Möchten Sie diese RCU wirklich löschen?')) {
-          this.rcuService.deleteRcu(id).subscribe({
-            next: () => {
-              this.loadData(); // Nach dem Löschen neu laden
-            },
-            error: () => {
-              this.errorMsg = 'Fehler beim Löschen der RCU.';
-            }
-          });
+    deleteRcu(id: number): void {
+      if (confirm('Möchten Sie diese RCU wirklich löschen?')) {
+        this.rcuService.deleteRcu(id).subscribe({
+          next: () => {
+            this.loadData(); // Nach dem Löschen neu laden
+          },
+          error: () => {
+            this.errorMsg = 'Fehler beim Löschen der RCU.';
+          }
+        });
+      }
+    }
+
+    getMachineImage(machineName: string): { src: string; height: string } {
+        if (!machineName) return { src: 'maschine.png', height: 'h-28' };
+
+        const name = machineName.toLowerCase();
+
+        if (name.includes('bagger')) {
+          return { src: 'bagger.png', height: 'h-28' };
+        } else if (name.includes('kuka')) {
+          return { src: 'kuka.png', height: 'h-28' };
+        } else if (name.includes('walze')) {
+          return { src: 'walze.png', height: 'h-28' };
+        } else {
+          return { src: 'maschine.png', height: 'h-28' };
         }
       }
 
