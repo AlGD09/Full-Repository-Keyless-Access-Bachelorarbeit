@@ -15,28 +15,28 @@
   <div class="bg-white rounded-2xl px-20 pt-16 w-full">
 
     <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left border-t border-gray-200 min-w-[650px]">
-        <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
+      <table class="w-full text-sm text-left border-gray-200 min-w-[650px] max-w-[1300px]">
+        <thead class="bg-[#f7f7f7] font-semibold text-[#002B49] text-base uppercase">
         <tr>
-          <th class="px-4 py-2">ID</th>
-          <th class="px-4 py-2">User Name</th>
-          <th class="px-4 py-2">Email</th>
-          <th class="px-4 py-2">Aktionen</th>
+          <th class="px-10 py-2 first:rounded-tl-xl w-[10%]">ID</th>
+          <th class="px-20 py-2 w-[30%]">Benutzername</th>
+          <th class="px-20 py-2 w-[45%]">E-mail</th>
+          <th class="px-4 py-2 last:rounded-tr-xl w-[15%]"></th>
         </tr>
         </thead>
 
         <tbody class="divide-y divide-gray-100">
         <tr
           *ngFor="let u of users"
-          class="hover:bg-blue-50 transition text-gray-700 align-middle"
+          class="hover:bg-[#fcfcfc] transition text-gray-700 text-[16px] align-middle"
         >
-          <td class="px-4 py-2 whitespace-nowrap">{{ u.id }}</td>
-          <td class="px-4 py-2">{{ u.username }}</td>
-          <td class="px-4 py-2 whitespace-nowrap">{{ u.email }}</td>
+          <td class="px-10 py-2 whitespace-nowrap hover:text-blue-900 border-r border-gray-100">{{ u.id }}</td>
+          <td class="px-20 py-2 hover:text-blue-900 border-r border-gray-100">{{ u.username }}</td>
+          <td class="px-20 py-2 whitespace-nowrap hover:text-blue-900 ">{{ u.email }}</td>
           <td class="px-4 py-2 text-left">
             <button
               (click)="deleteUser(u.id!)"
-              class="text-red-600 hover:text-red-800 font-medium whitespace-nowrap px-2 py-1 rounded transition"
+              class="text-red-700 hover:text-red-900 font-medium whitespace-nowrap px-2 py-1 rounded transition"
             >
               Löschen
             </button>
