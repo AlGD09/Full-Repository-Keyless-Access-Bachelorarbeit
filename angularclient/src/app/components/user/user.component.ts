@@ -76,6 +76,21 @@ export class UserComponent {
 
   }
 
+   fillRandomHash(input: HTMLInputElement): void {
+     const hexChars = 'abcdef0123456789';
+     let hash = '';
+     for (let i = 0; i < 32; i++) {
+       hash += hexChars.charAt(Math.floor(Math.random() * hexChars.length));
+     }
+
+     input.value = hash;
+
+     // Diese Zeile sorgt dafür, dass Angular den neuen Wert erkennt
+     input.dispatchEvent(new Event('input'));
+   }
+
+
+
   requestHash(): void {
       if (!this.selectedUser) {
         alert('Bitte ein User auswählen.');
