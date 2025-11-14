@@ -12,6 +12,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByRcuIdOrderByEventTimeAsc(String rcuId);
     List<Event> findTop20ByOrderByEventTimeDesc();
     List<Event> findTop10ByRcuIdOrderByEventTimeDesc(String rcuId);
+    List<Event> findTop10ByRcuIdAndDeviceNameOrderByEventTimeDesc(String rcuId, String deviceName);
 
     @Query("SELECT DISTINCT e.rcuId FROM Event e")
     List<String> findDistinctRcuIds();

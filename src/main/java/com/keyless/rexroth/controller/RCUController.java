@@ -92,11 +92,6 @@ public class RCUController {
         return ResponseEntity.ok(rcuService.getRcuEvents(rcuId));
     }
 
-    @GetMapping("/events/anomaly/{rcuId}")
-    public ResponseEntity<?> RcuAnomaly(@PathVariable String rcuId) {
-        return ResponseEntity.ok(rcuService.detectAnomalyForRcu(rcuId));
-    }
-
     @GetMapping("/events/anomalies")
     public ResponseEntity<List<Anomaly>> getAllAnomalies() {
         return ResponseEntity.ok(rcuService.detectAllAnomalies());

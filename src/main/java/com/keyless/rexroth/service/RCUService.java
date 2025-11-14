@@ -1,9 +1,6 @@
 package com.keyless.rexroth.service;
 
-import com.keyless.rexroth.entity.RCU;
-import com.keyless.rexroth.entity.Smartphone;
-import com.keyless.rexroth.entity.Event;
-import com.keyless.rexroth.entity.Anomaly;
+import com.keyless.rexroth.entity.*;
 import com.keyless.rexroth.repository.RCURepository;
 import com.keyless.rexroth.repository.SmartphoneRepository;
 import com.keyless.rexroth.repository.EventRepository;
@@ -12,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Service
@@ -99,70 +94,48 @@ public class RCUService {
             eventRepository.delete(oldest);
             events.remove(0);
         }
-        Anomaly anomaly = detectAnomalyForRcu(rcuId);
+        Anomaly anomaly = detectAnomalyForRcu(rcuId, deviceName, event);
         if (anomaly != null) {
             anomalyRepository.save(anomaly);
         }
 
     }
 
-    public Anomaly detectAnomalyForRcu(String rcuId) {
+    public Anomaly detectAnomalyForRcu(String rcuId, String deviceName, Event event) {
 
-        List<Event> events = eventRepository.findTop10ByRcuIdOrderByEventTimeDesc(rcuId);
+        List<Event> events = eventRepository.findTop10ByRcuIdAndDeviceNameOrderByEventTimeDesc(rcuId, deviceName);
 
-        if (events.size() < 2) {
-            return null;
-        }
+        if (events.size() < 2) return null;
 
-        Map<String, Integer> failCounts = new HashMap<>();
-        Map<String, LocalDateTime> lastFailTimestamp = new HashMap<>();
+        // Event lastEvent = events.get(events.size() - 1);
+        Event penultimateEvent = events.get(1);
 
-        for (Event e : events) {
+        // String lastResult = lastEvent.getResult();
+        String penultimateResult = penultimateEvent.getResult();
 
-            String device = e.getDeviceName();
-            String result = e.getResult();
 
-            // ❗ FALL 1 – Fehler
-            if (result.equals("Fehler")) {
+        String result = event.getResult();
+        // Fail fAil = failRepository.findByRcuIdAndDeviceName(rcuId, device);
 
-                int fails = failCounts.getOrDefault(device, 0) + 1;
-                failCounts.put(device, fails);
-                lastFailTimestamp.put(device, e.getEventTime());
+        if (result.equals("Fehler") && penultimateResult.equals("Fehler")) {
 
-                // Neue Anomalie: 2 Fehler ohne Authentifiziert
-                if (fails >= 2) {
-                    Anomaly anomaly = new Anomaly();
-                    RCU rcu = rcuRepository.findByRcuId(rcuId);
-                    anomaly.setName(rcu.getName());
-                    anomaly.setDeviceName(device);
-                    anomaly.setRcuId(rcuId);
-                    anomaly.setEventTime(e.getEventTime());
-                    return anomaly;
-                }
+            if (!anomalyRepository.existsByRcuIdAndDeviceNameAndEventTime(rcuId, deviceName, event.getEventTime())) {
+                return createAnomaly(rcuId, deviceName, event.getEventTime());
             }
 
-            // ❗ FALL 2 – Authentifiziert
-            else if (result.equals("Authentifiziert")) {
-
-                int fails = failCounts.getOrDefault(device, 0);
-
-                // Alte Anomalie: 2 Fehler vor einem Erfolg
-                if (fails >= 2) {
-                    Anomaly anomaly = new Anomaly();
-                    RCU rcu = rcuRepository.findByRcuId(rcuId);
-                    anomaly.setName(rcu.getName());
-                    anomaly.setDeviceName(device);
-                    anomaly.setRcuId(rcuId);
-                    anomaly.setEventTime(e.getEventTime());
-                    return anomaly;
-                }
-
-                // Reset nur für dieses Gerät
-                failCounts.put(device, 0);
-            }
         }
 
         return null;
+    }
+
+    private Anomaly createAnomaly(String rcuId, String device, LocalDateTime ts) {
+        RCU rcu = rcuRepository.findByRcuId(rcuId);
+        Anomaly anomaly = new Anomaly();
+        anomaly.setName(rcu.getName());
+        anomaly.setDeviceName(device);
+        anomaly.setRcuId(rcuId);
+        anomaly.setEventTime(ts);
+        return anomaly;
     }
 
 
