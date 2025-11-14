@@ -2,7 +2,7 @@
 
   <!-- Überschrift -->
   <div class="px-20 pt-28 pb-6">
-    <h1 class="text-4xl font-extrabold text-[#002B49]">Sicherheitsereignisse</h1>
+    <h1 class="text-4xl font-extrabold text-[#002B49]">Systemereignisse</h1>
     <p class="text-gray-600 leading-relaxed">
       <br />
       Diese Sektion stellt eine Übersicht der Maschinenereignisse bereit. Dazu werden Anomalien erkannt und gemeldet.
@@ -16,8 +16,8 @@
         Ereignisse-Übersicht
       </h2>
       <!-- SVG-Container -->
-      <div class="w-full flex justify-center items-center mb-4">
-        <svg class="event-graph w-full" style="height: 1200px;"></svg>
+      <div class="w-full flex justify-center items-center mb-4 border border-[#f7f7f7] rounded-xl">
+        <svg class="event-graph w-full" style="height: 800px;"></svg>
       </div>
     </div>
 
@@ -46,20 +46,22 @@
             <p class="text-xs text-gray-500">ID: {{ a.rcuId }}</p>
           </div>
 
-          <!-- Smartphone ID -->
-          <div class="mb-3">
-            <h3 class="text-lg font-semibold text-[#002B49] leading-tight">
-              {{ a.deviceName || 'Unbekanntes Smartphone'}}
-            </h3>
-            <p class="text-xs text-gray-500">ID: {{ a.rcuId }}</p>
-          </div>
+          <div class="pt-1 text-gray-600 text-center mb-4 flex flex-col justify-between">
 
-          <!-- Time -->
-          <div class="flex justify-left items-baseline space-x-2">
-            <div class="font-semibold text-gray-900">Last Seen:</div>
-            <div class="font-medium text-sm">
-              {{ a.eventTime ? (a.eventTime | date:'dd.MM.yyyy - HH:mm') : '—' }}
+            <!-- Device-Name -->
+            <div class="flex justify-left items-baseline space-x-0">
+              <div class="px-2 font-semibold text-gray-900 text-sm w-32 text-left">Gerätename:</div>
+              <div class="font-medium text-sm">{{ a.deviceName || 'Unbekanntes Smartphone' }}</div>
             </div>
+
+            <!-- Time -->
+            <div class="flex justify-left items-baseline space-x-0">
+              <div class="px-2 font-semibold text-gray-900 text-sm w-36 text-left">Erkannt am:</div>
+              <div class="font-medium text-sm">
+                {{ a.eventTime ? (a.eventTime | date:'dd.MM.yyyy - HH:mm') : '—' }}
+              </div>
+            </div>
+
           </div>
 
           <!-- Löschen-Button unten -->

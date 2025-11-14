@@ -93,7 +93,7 @@ export class EventComponent implements OnInit {
     svg.selectAll("*").remove();
 
     const WIDTH = 800;
-    const HEIGHT = 1200;
+    const HEIGHT = 800;
     const spacing = 80;
 
     svg
@@ -163,10 +163,18 @@ export class EventComponent implements OnInit {
       .attr("class", "label-main")
       .attr("x", (d) => d.x + 14)
       .attr("y", (d) => d.y - 4)
-      .text((d) => `${d.result} – ${d.name}`)
-      .style("font-size", "14px")
-      .style("font-weight", "600")
+      .style("font-size", "15px")
       .style("fill", "#333");
+
+    // Fettes d.result
+    labelMain.append("tspan")
+      .text(d => d.result + " – ")
+      .style("font-weight", "600");
+
+    // Leichtes d.name
+    labelMain.append("tspan")
+      .text(d => d.name)
+      .style("font-weight", "300");   // oder "normal"
 
     // Untertitel
     const labelSub = layerLabels.selectAll("text.label-sub")
@@ -177,7 +185,7 @@ export class EventComponent implements OnInit {
       .attr("x", (d) => d.x + 14)
       .attr("y", (d) => d.y + 14)
       .text((d) => `${d.deviceName ?? "Unbekanntes Smartphone"} – ${this.formatDate(d.eventTime ?? "")}`)
-      .style("font-size", "11px")
+      .style("font-size", "12px")
       .style("fill", "#666");
 
     //

@@ -1,7 +1,4 @@
 
-
-
-
 export interface Anomaly {
   id?: number;
   name: string;

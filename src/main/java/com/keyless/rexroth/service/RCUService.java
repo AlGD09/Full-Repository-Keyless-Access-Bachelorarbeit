@@ -110,7 +110,7 @@ public class RCUService {
 
         List<Event> events = eventRepository.findTop10ByRcuIdOrderByEventTimeDesc(rcuId);
 
-        if (events.size() < 3) {
+        if (events.size() < 2) {
             return null;
         }
 
@@ -129,8 +129,8 @@ public class RCUService {
                 failCounts.put(device, fails);
                 lastFailTimestamp.put(device, e.getEventTime());
 
-                // Neue Anomalie: 3 Fehler ohne Authentifiziert
-                if (fails >= 3) {
+                // Neue Anomalie: 2 Fehler ohne Authentifiziert
+                if (fails >= 2) {
                     Anomaly anomaly = new Anomaly();
                     RCU rcu = rcuRepository.findByRcuId(rcuId);
                     anomaly.setName(rcu.getName());
@@ -146,8 +146,8 @@ public class RCUService {
 
                 int fails = failCounts.getOrDefault(device, 0);
 
-                // Alte Anomalie: 3 Fehler vor einem Erfolg
-                if (fails >= 3) {
+                // Alte Anomalie: 2 Fehler vor einem Erfolg
+                if (fails >= 2) {
                     Anomaly anomaly = new Anomaly();
                     RCU rcu = rcuRepository.findByRcuId(rcuId);
                     anomaly.setName(rcu.getName());

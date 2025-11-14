@@ -56,7 +56,8 @@ export class HomeComponent {
 
   systemDock = [
     { icon: 'fas fa-list', label: 'Systemeinheiten', route: '/einheiten' },
-    { icon: 'fas fa-diagram-project', label: 'Zuweisungen', route: '/zuweisungen' }
+    { icon: 'fas fa-diagram-project', label: 'Zuweisungen', route: '/zuweisungen' },
+    { icon: 'fas fa-clock-rotate-left', label: 'Systemereignisse', route: '/ereignisse' }
   ];
 
   // Lädt beide Tabellen gleichzeitig

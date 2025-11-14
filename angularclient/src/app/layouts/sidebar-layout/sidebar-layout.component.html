@@ -38,7 +38,7 @@
       <a
         routerLink="/home"
         routerLinkActive="bg-blue-50 text-blue-600"
-        class="flex items-center justify-between w-full px-3 py-2 rounded-lg hover:bg-blue-50 transition"
+        class="flex items-center justify-between w-full px-3 py-2 rounded-lg hover:bg-blue-50 transition hover:no-underline"
       >
         <div class="flex items-center gap-3">
           <i class="fas fa-home w-5 text-gray-500 mx-auto" [ngClass]="{ 'mx-0': isExpanded }"></i>
@@ -76,11 +76,11 @@
           *ngIf="isExpanded && openSection === 'registrierung'"
           class="ml-8 mt-1 space-y-1"
         >
-          <a routerLink="/user" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600"
+          <a routerLink="/user" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600 hover:no-underline"
              routerLinkActive="text-blue-600 font-semibold">Benutzer</a>
-          <a routerLink="/smartphone" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600"
+          <a routerLink="/smartphone" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600 hover:no-underline"
              routerLinkActive="text-blue-600 font-semibold">Smartphones</a>
-          <a routerLink="/maschine" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600"
+          <a routerLink="/maschine" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600 hover:no-underline"
              routerLinkActive="text-blue-600 font-semibold">Maschinen</a>
         </div>
       </div>
@@ -106,10 +106,10 @@
           *ngIf="isExpanded && openSection === 'system'"
           class="ml-8 mt-1 space-y-1"
         >
-          <a routerLink="/einheiten" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600"
+          <a routerLink="/einheiten" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600 hover:no-underline"
              routerLinkActive="text-blue-600 font-semibold">Einheiten
           </a>
-          <a routerLink="/zuweisungen" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600"
+          <a routerLink="/zuweisungen" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600 hover:no-underline"
              routerLinkActive="text-blue-600 font-semibold">Zuweisungen</a>
         </div>
       </div>
@@ -118,10 +118,10 @@
       <a
         routerLink="/ereignisse"
         routerLinkActive="bg-blue-50 text-blue-600"
-        class="flex items-center justify-between w-full px-3 py-2 rounded-lg hover:bg-blue-50 transition"
+        class="flex items-center justify-between w-full px-3 py-2 rounded-lg hover:bg-blue-50 transition hover:no-underline"
       >
         <div class="flex items-center gap-3">
-          <i class="fas fa-binoculars w-5 text-gray-500 mx-auto" [ngClass]="{ 'mx-0': isExpanded }"></i>
+          <i class="fas fa-clock-rotate-left w-5 text-gray-500 mx-auto" [ngClass]="{ 'mx-0': isExpanded }"></i>
           <span
             *ngIf="isExpanded"
             class="font-medium transition-opacity duration-300 whitespace-nowrap"
