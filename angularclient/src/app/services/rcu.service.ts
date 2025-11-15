@@ -57,6 +57,10 @@ deleteAnomaly(id: number) {
     return this.http.delete(`${this.baseUrl}/events/delete/${id}`);
 }
 
+deleteAllAnomalies() {
+    return this.http.delete(`${this.baseUrl}/events/delete/anomalies`)
+}
+
   }
 
 

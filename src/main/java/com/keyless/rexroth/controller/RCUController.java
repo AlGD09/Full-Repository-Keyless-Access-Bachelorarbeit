@@ -103,9 +103,10 @@ public class RCUController {
         return ResponseEntity.noContent().build();
     }
 
-
-
-
-
+    @DeleteMapping("/events/delete/anomalies")
+    public ResponseEntity<Void> deleteAllAnomalies() {
+        rcuService.deleteAllAnomalies();
+        return ResponseEntity.noContent().build();
+    }
 
 }

@@ -22,9 +22,27 @@
     </div>
 
     <div class="w-[50%] mb-4">
-      <h2 class="text-xl font-semibold text-[#002B49] mb-4">
+      <h2 class="text-xl font-semibold text-[#002B49]">
         Anomalien
       </h2>
+      <!-- Button oben rechts nur wenn mehr als eine Anomalie -->
+      <div class="flex justify-end mb-2 h-6">
+        <button
+          *ngIf="anomalies && anomalies.length > 1; else emptyButton"
+          (click)="deleteAllAnomalies()"
+          class="text-red-700 hover:text-red-900 transition"
+          title="Alle Anomalien Löschen"
+        >
+          Alle löschen
+        </button>
+      </div>
+
+      <!-- Unsichtbarer Platzhalter -->
+      <ng-template #emptyButton>
+        <button class="opacity-0 pointer-events-none">
+          Platzhalter
+        </button>
+      </ng-template>
       <div
         *ngIf="anomalies?.length; else noAnomalies"
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"
@@ -98,8 +116,8 @@
 
       <!-- Keine Anomalien -->
       <ng-template #noAnomalies>
-        <div class="text-gray-500 italic mt-6 text-sm text-center">
-          Keine Anomalien erkannt
+        <div class="flex text-gray-500 italic justify-center items-center text-sm text-center">
+          Keine Anomalien festgestellt
         </div>
       </ng-template>
 

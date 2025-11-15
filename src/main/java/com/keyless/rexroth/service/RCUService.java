@@ -151,6 +151,10 @@ public class RCUService {
         }
     }
 
+    public void deleteAllAnomalies() {
+        anomalyRepository.deleteAll();
+    }
+
 
 
 }

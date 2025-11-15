@@ -86,6 +86,29 @@ export class EventComponent implements OnInit {
     });
   }
 
+  deleteAllAnomalies(): void {
+    Swal.fire({
+      text: `Möchten Sie wirklich alle Meldungen löschen?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Ja',
+      cancelButtonText: 'Nein',
+      color: '#002B49',
+      buttonsStyling: false,
+      customClass: {
+        actions: 'space-x-4 justify-center',
+        confirmButton: 'text-[#002B49] font-semibold px-4 py-2 rounded-lg hover:text-blue-800 transition',
+        cancelButton: 'text-[#002B49] font-semibold px-4 py-2 rounded-lg hover:text-blue-800 transition'
+      }
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.rcuService.deleteAllAnomalies().subscribe({
+          next: () => this.loadData()
+        });
+      }
+    });
+  }
+
   renderTree(events: Event[]) {
 
     const element = this.el.nativeElement.querySelector('svg.event-graph');
