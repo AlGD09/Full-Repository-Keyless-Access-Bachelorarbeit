@@ -4,6 +4,7 @@ import com.keyless.rexroth.dto.RCUAssignDTO;
 import com.keyless.rexroth.dto.RCUEreignisDTO;
 import com.keyless.rexroth.dto.RCURegistrationDTO;
 import com.keyless.rexroth.dto.SmartphoneUnassignDTO;
+import com.keyless.rexroth.dto.RCULockDTO;
 import com.keyless.rexroth.entity.Anomaly;
 import com.keyless.rexroth.entity.RCU;
 import com.keyless.rexroth.entity.Event;
@@ -118,10 +119,10 @@ public class RCUController {
     }
 
     @PostMapping("/lock/{rcuId}")
-    public DeferredResult<ResponseEntity<Map<String, Object>>> lock(@PathVariable String rcuId) {
-        DeferredResult<ResponseEntity<Map<String, Object>>> deferredResult = rcuService.createOperation(rcuId);
+    public DeferredResult<ResponseEntity<Map<String, Object>>> lock(@RequestBody RCULockDTO dto) {
+        DeferredResult<ResponseEntity<Map<String, Object>>> deferredResult = rcuService.createOperation(dto.getRcuId(), dto.getDeviceName(), dto.getDeviceId());
 
-        rcuService.sendLockEvent(rcuId);
+        rcuService.sendLockEvent(dto.getRcuId());
 
         return deferredResult;
     }

@@ -106,7 +106,12 @@ public class RCUService {
         if (result.equals("Verriegelt")) {
             rcu.setStatus("inactive");
             confirmLock(rcuId);
+            rcuRepository.save(rcu);
+        } else if (result.equals("Ungewöhnliche Verriegelung")) {
+            rcu.setStatus("inactive");
+            rcuRepository.save(rcu);
         }
+
 
         eventRepository.save(event);
 
@@ -216,7 +221,7 @@ public class RCUService {
         activeSinkMap.remove(rcuId);
     }
 
-    public DeferredResult<ResponseEntity<Map<String, Object>>> createOperation(String rcuId) {
+    public DeferredResult<ResponseEntity<Map<String, Object>>> createOperation(String rcuId, String deviceName, String deviceId) {
         DeferredResult<ResponseEntity<Map<String, Object>>> deferredResult = new DeferredResult<>(TIMEOUT_MILLIS);
 
         operationResults.put(rcuId, deferredResult);
@@ -228,6 +233,7 @@ public class RCUService {
             );
             deferredResult.setResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(body));
             operationResults.remove(rcuId);
+            addNewEvent(rcuId, deviceName, deviceId, "Ungewöhnliche Verriegelung");
         });
 
         deferredResult.onCompletion(() -> operationResults.remove(rcuId));
