@@ -92,6 +92,21 @@ public class RCUService {
 
     public void addNewEvent(String rcuId, String deviceName, String deviceId, String result) {
         RCU rcu = rcuRepository.findByRcuId(rcuId);
+        Event lastEvent = eventRepository.findTop1ByRcuIdOrderByEventTimeDesc(rcuId);
+
+        // Ungwöhnliche Verriegelung bei App lost Cloud Verbindung + neue Maschine Session danach erkennen
+        if (result.equals("Zugang autorisiert")
+                && !lastEvent.getResult().equals("Verriegelt")
+                && !lastEvent.getResult().equals("Ungewöhnliche Verriegelung")) {
+            Event event = new Event();
+            event.setName(rcu.getName());
+            event.setRcuId(rcuId);
+            event.setDeviceName(lastEvent.getDeviceName());
+            event.setDeviceId(lastEvent.getDeviceId());
+            event.setResult("Ungewöhnliche Verriegelung");
+            event.setEventTime(java.time.LocalDateTime.now());
+            eventRepository.save(event);
+        }
         Event event = new Event();
         event.setName(rcu.getName());
         event.setRcuId(rcuId);
