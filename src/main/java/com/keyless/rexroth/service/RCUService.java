@@ -105,6 +105,9 @@ public class RCUService {
             event.setResult("Ungewöhnliche Verriegelung");
             event.setEventTime(java.time.LocalDateTime.now());
             eventRepository.save(event);
+
+            rcu.setStatus("inactive");
+            rcuRepository.save(rcu);
         }
         Event event = new Event();
         event.setName(rcu.getName());
