@@ -132,4 +132,50 @@ public class RCUController {
         return deferredResult;
     }
 
+    // Endpoints zum Remote Control
+    @GetMapping("/status/{rcuId}")
+    public ResponseEntity<?> getRcuStatus(@PathVariable String rcuId) {
+        String status = rcuService.getRcuStatus(rcuId);
+        if (status == null) {
+            return ResponseEntity.status(404).body(Map.of("message", "Kein Status gefunden."));
+        }
+
+        return ResponseEntity.ok(Map.of("status", status));
+    }
+
+    @GetMapping(value = "/remote/sse/{rcuId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> remoteEvents(@PathVariable String rcuId) {
+
+        rcuService.addNewEvent(rcuId, "Remote Control", "1", "Fernsteuerung aktiviert");
+        return rcuService.streamEvents(rcuId);
+    }
+
+    @PostMapping("/remote/lock/{rcuId}")
+    public DeferredResult<ResponseEntity<Map<String, Object>>> remoteLock(@PathVariable String rcuId) {
+        DeferredResult<ResponseEntity<Map<String, Object>>> deferredResult = rcuService.remoteLock(rcuId);
+
+        rcuService.sendRemoteLockEvent(rcuId);
+
+        return deferredResult;
+    }
+
+    @PostMapping("/remote/unlock/{rcuId}")
+    public DeferredResult<ResponseEntity<Map<String, Object>>> remoteUnlock(@PathVariable String rcuId) {
+        DeferredResult<ResponseEntity<Map<String, Object>>> deferredResult = rcuService.remoteLock(rcuId);
+
+        rcuService.sendRemoteUnlockEvent(rcuId);
+
+        return deferredResult;
+    }
+
+    @PostMapping("/remote/exit/{rcuId}")
+    public DeferredResult<ResponseEntity<Map<String, Object>>> remoteExit(@PathVariable String rcuId) {
+        DeferredResult<ResponseEntity<Map<String, Object>>> deferredResult = rcuService.remoteLock(rcuId);
+
+        rcuService.sendRemoteExitEvent(rcuId);
+
+        return deferredResult;
+    }
+
+
 }

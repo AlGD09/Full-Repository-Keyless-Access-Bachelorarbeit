@@ -51,7 +51,7 @@ public class RCUService {
         rcu.setRcuId(rcuId);
         rcu.setName(name);
         rcu.setLocation(location);
-        rcu.setStatus("inactive");
+        rcu.setStatus("offline");
         return rcuRepository.save(rcu);
     }
 
@@ -106,7 +106,7 @@ public class RCUService {
             event.setEventTime(java.time.LocalDateTime.now());
             eventRepository.save(event);
 
-            rcu.setStatus("inactive");
+            rcu.setStatus("idle");
             rcuRepository.save(rcu);
         }
         Event event = new Event();
@@ -117,16 +117,37 @@ public class RCUService {
         event.setResult(result);
         event.setEventTime(java.time.LocalDateTime.now());
         if (result.equals("Entriegelt")) {
-            rcu.setStatus("active");
+            rcu.setStatus("operational");
             rcuRepository.save(rcu);
         }
         if (result.equals("Verriegelt")) {
-            rcu.setStatus("inactive");
-            confirmLock(rcuId);
+            rcu.setStatus("idle");
+            confirmLock(rcuId);  // DeferredResult -> accepted
             rcuRepository.save(rcu);
         } else if (result.equals("Ungewöhnliche Verriegelung")) {
-            rcu.setStatus("inactive");
+            rcu.setStatus("idle");
             rcuRepository.save(rcu);
+        }
+
+        if (result.equals("Remote Verriegelt")) {
+            rcu.setStatus("Remote - operational");
+            confirmLock(rcuId);  // DeferredResult -> accepted
+            rcuRepository.save(rcu);
+        } else if (result.equals("Remote Entriegelt")) {
+            confirmLock(rcuId);
+            rcu.setStatus("Remote - idle");
+            rcuRepository.save(rcu);
+        }
+
+        if (result.equals("Fernsteuerung aktiviert")) {
+            rcu.setStatus("Remote - active");
+            rcuRepository.save(rcu);
+        }
+
+        if (result.equals("Fernsteuerung deaktiviert")) {
+            rcu.setStatus("idle");
+            rcuRepository.save(rcu);
+            confirmLock(rcuId);
         }
 
 
@@ -202,10 +223,21 @@ public class RCUService {
         anomalyRepository.deleteAll();
     }
 
+
+    // Verriegelungsmethoden
+
     public Flux<String> streamEvents(String rcuId) {
         if (activeSinkMap.get(rcuId) != null) {
             activeSinkMap.remove(rcuId);
         }
+
+        // Remote Mode Status Änderung
+        RCU rcu = rcuRepository.findByRcuId(rcuId);
+        if (rcu.getStatus().equals("remote mode requested")) {
+            rcu.setStatus("Remote - idle");
+            rcuRepository.save(rcu);
+        }
+
         Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
         activeSinkMap.put(rcuId, sink);
 
@@ -230,11 +262,7 @@ public class RCUService {
         if (sink != null) {
             sink.tryEmitNext("LOCK");
         }
-        RCU rcu = rcuRepository.findByRcuId(rcuId);
-        if (rcu != null) {
-            rcu.setStatus("inactive");
-            rcuRepository.save(rcu);
-        }
+
         activeSinkMap.remove(rcuId);
     }
 
@@ -265,6 +293,11 @@ public class RCUService {
             if (!event.getResult().equals("Zugang verweigert")) {
                 addNewEvent(rcuId, deviceName, deviceId, "Ungewöhnliche Verriegelung");
             }
+            RCU rcu = rcuRepository.findByRcuId(rcuId);
+            if (rcu != null) {
+                rcu.setStatus("offline");
+                rcuRepository.save(rcu);
+            }
         });
 
 
@@ -288,6 +321,70 @@ public class RCUService {
         deferredResult.setResult(ResponseEntity.accepted().body(body));
     }
 
+    // Remote Control Methoden
+
+    public String getRcuStatus(String rcuId) {
+        RCU rcu = rcuRepository.findByRcuId(rcuId);
+        if (!rcu.getStatus().equals("remote mode requested")) {
+            rcu.setStatus("idle");
+            rcuRepository.save(rcu);
+        }
+        return rcu.getStatus();
+    }
+
+    public DeferredResult<ResponseEntity<Map<String, Object>>> remoteLock(String rcuId) {
+        DeferredResult<ResponseEntity<Map<String, Object>>> deferredResult = new DeferredResult<>(TIMEOUT_MILLIS);
+
+        Event event = eventRepository.findTop1ByRcuIdOrderByEventTimeDesc(rcuId);
+
+        operationResults.put(rcuId, deferredResult);
+
+        deferredResult.onTimeout(() -> {
+            Map<String, Object> body = Map.of(
+                    "rcuId", rcuId,
+                    "status", "timeout"
+            );
+            deferredResult.setResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(body));
+            operationResults.remove(rcuId);
+            if (event.getResult().equals("Remote entriegelt")) {
+                addNewEvent(rcuId, "Remote Control", "1", "Ungewöhnliche Verriegelung");
+            }
+            addNewEvent(rcuId, "Remote Control", "1", "Fernsteuerung deaktiviert");
+            RCU rcu = rcuRepository.findByRcuId(rcuId);
+            if (rcu != null) {
+                rcu.setStatus("offline");
+                rcuRepository.save(rcu);
+            }
+        });
+
+        deferredResult.onCompletion(() -> operationResults.remove(rcuId));
+
+        return deferredResult;
+    }
+
+    public void sendRemoteLockEvent(String rcuId) {
+        Sinks.Many<String> sink = activeSinkMap.get(rcuId);
+        if (sink != null) {
+            sink.tryEmitNext("LOCK");
+        }
+    }
+
+
+    public void sendRemoteUnlockEvent(String rcuId) {
+        Sinks.Many<String> sink = activeSinkMap.get(rcuId);
+        if (sink != null) {
+            sink.tryEmitNext("UNLOCK");
+        }
+    }
+
+    public void sendRemoteExitEvent(String rcuId) {
+        Sinks.Many<String> sink = activeSinkMap.get(rcuId);
+        if (sink != null) {
+            sink.tryEmitNext("EXIT");
+        }
+
+        activeSinkMap.remove(rcuId);
+    }
 
 
 }

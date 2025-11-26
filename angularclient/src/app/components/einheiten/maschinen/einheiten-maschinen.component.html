@@ -52,6 +52,23 @@
           </div>
         </div>
 
+        <!-- Status -->
+        <div class="mb-3">
+          <h3
+            class="text-lg font-semibold leading-tight capitalize"
+            [ngClass]="{
+              'text-green-600': r.status === 'idle',
+              'text-gray-600': r.status === 'offline',
+              'text-orange-700': r.status === 'operational',
+              'text-[#800080]': r.status === 'remote mode',
+              'text-[#CD853F]': r.status === 'remote mode requested',
+              'text-gray-500': !r.status
+            }"
+          >
+            {{ r.status || 'Offline'}}
+          </h3>
+        </div>
+
 
         <!-- Löschen-Button unten -->
         <button
