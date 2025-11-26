@@ -36,7 +36,7 @@ public class RCUService {
     @Autowired
     private AnomalyRepository anomalyRepository;
 
-    private static final long TIMEOUT_MILLIS = 10_000L;  // Timeout zum Antworten auf App Verriegelungsbefehl
+    private static final long TIMEOUT_MILLIS = 5_000L;  // Timeout zum Antworten auf App Verriegelungsbefehl
 
     // Jede RCU (jede Maschine) erhält ihren eigenen SSE-Stream
     private final Map<String, Sinks.Many<String>> activeSinkMap = new ConcurrentHashMap<>();
