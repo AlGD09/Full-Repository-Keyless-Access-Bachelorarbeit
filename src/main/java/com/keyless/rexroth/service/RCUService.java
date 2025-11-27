@@ -7,7 +7,7 @@ import com.keyless.rexroth.repository.EventRepository;
 import com.keyless.rexroth.repository.AnomalyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.scheduling.annotation.Scheduled;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,6 +42,9 @@ public class RCUService {
     private final Map<String, Sinks.Many<String>> activeSinkMap = new ConcurrentHashMap<>();
 
     private final ConcurrentMap<String, DeferredResult<ResponseEntity<Map<String, Object>>>> operationResults = new ConcurrentHashMap<>();
+
+    // Aktive Status Kontrolle aller registrierten RCUs
+    private final ConcurrentMap<String, LocalDateTime> lastStatusPoll = new ConcurrentHashMap<>();
 
     public RCU registerRcu(String rcuId, String name, String location) {
         if (rcuRepository.findByRcuId(rcuId) != null) {
@@ -78,6 +81,10 @@ public class RCUService {
 
     public void deleteRcu(Long id) {
         if (rcuRepository.existsById(id)) {
+            RCU rcu = rcuRepository.findById(id).orElse(null);
+            if (rcu != null) {
+                lastStatusPoll.remove(rcu.getRcuId());
+            }
             rcuRepository.deleteById(id);
         }
     }
@@ -95,7 +102,8 @@ public class RCUService {
         Event lastEvent = eventRepository.findTop1ByRcuIdOrderByEventTimeDesc(rcuId);
 
         // Ungwöhnliche Verriegelung bei App lost Cloud Verbindung + neue Maschine Session danach erkennen
-        if (result.equals("Zugang autorisiert")
+        if (lastEvent != null
+                && result.equals("Zugang autorisiert")
                 && lastEvent.getResult().equals("Entriegelt")) {
             Event event = new Event();
             event.setName(rcu.getName());
@@ -330,7 +338,22 @@ public class RCUService {
             rcu.setStatus("idle");
             rcuRepository.save(rcu);
         }
+        lastStatusPoll.put(rcuId, LocalDateTime.now());
         return rcu.getStatus();
+    }
+
+    @Scheduled(fixedDelay = 10_000)
+    public void markInactiveRcusOffline() {
+        LocalDateTime now = LocalDateTime.now();
+        lastStatusPoll.forEach((rcuId, lastPoll) -> {
+            if (Duration.between(lastPoll, now).getSeconds() > 30) {
+                RCU rcu = rcuRepository.findByRcuId(rcuId);
+                if (rcu != null && ("idle".equals(rcu.getStatus()) || "remote mode requested".equals(rcu.getStatus()))) {
+                    rcu.setStatus("offline");
+                    rcuRepository.save(rcu);
+                }
+            }
+        });
     }
 
     public DeferredResult<ResponseEntity<Map<String, Object>>> remoteLock(String rcuId) {
