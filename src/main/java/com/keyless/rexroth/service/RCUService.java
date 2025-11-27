@@ -41,6 +41,9 @@ public class RCUService {
     // Jede RCU (jede Maschine) erhält ihren eigenen SSE-Stream
     private final Map<String, Sinks.Many<String>> activeSinkMap = new ConcurrentHashMap<>();
 
+    // Erkennen ob SSE-Verbindung ausserordentlich unterbrochen wurde}
+    private final Map<String, Boolean> exitFlagMap = new ConcurrentHashMap<>();
+
     private final ConcurrentMap<String, DeferredResult<ResponseEntity<Map<String, Object>>>> operationResults = new ConcurrentHashMap<>();
 
     // Aktive Status Kontrolle aller registrierten RCUs
@@ -238,9 +241,13 @@ public class RCUService {
         if (activeSinkMap.get(rcuId) != null) {
             activeSinkMap.remove(rcuId);
         }
+        if (exitFlagMap.get(rcuId) != null) {
+            exitFlagMap.remove(rcuId);
+        }
 
         Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
         activeSinkMap.put(rcuId, sink);
+        exitFlagMap.put(rcuId, false);
 
         Flux<String> heartbeat = Flux.interval(Duration.ofSeconds(10))
                 .map(t -> "HEARTBEAT");
@@ -254,12 +261,33 @@ public class RCUService {
                         sink.asFlux(),
                         heartbeat
                 )
-                .map(event -> "data:" + event + "\n\n");
+                .map(event -> "data:" + event + "\n\n")
+                .doOnCancel(() -> {
+                    boolean exitSent = exitFlagMap.getOrDefault(rcuId, false);
+
+                    if (!exitSent) {
+                        Event event = eventRepository.findTop1ByRcuIdOrderByEventTimeDesc(rcuId);
+                        RCU rcu = rcuRepository.findByRcuId(rcuId);
+                        if (rcu != null && (rcu.getStatus().equals("Remote - operational") || rcu.getStatus().equals("Remote - idle"))) {
+                            if (event.getResult().equals("Remote Entriegelt")) {
+                                addNewEvent(rcuId, "Remote Control", "1", "Ungewöhnliche Verriegelung");
+                            }
+                            addNewEvent(rcuId, "Remote Control", "1", "Fernsteuerung deaktiviert");
+                        }
+                        if (rcu != null) {
+                            rcu.setStatus("offline");
+                            rcuRepository.save(rcu);
+                        }
+
+                    }
+                    exitFlagMap.remove(rcuId);
+                });
     }
 
     // Wird aufgerufen, wenn von der App aus LOCK ausgeführt werden soll
     public void sendLockEvent(String rcuId) {
         Sinks.Many<String> sink = activeSinkMap.get(rcuId);
+        exitFlagMap.put(rcuId, true);
         if (sink != null) {
             sink.tryEmitNext("LOCK");
         }
@@ -403,6 +431,7 @@ public class RCUService {
 
     public void sendRemoteExitEvent(String rcuId) {
         Sinks.Many<String> sink = activeSinkMap.get(rcuId);
+        exitFlagMap.put(rcuId, true);
         if (sink != null) {
             sink.tryEmitNext("EXIT");
         }
