@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { RcuService } from '../../../services/rcu.service';
 import { Rcu } from '../../../model/rcu';
 import { Remote } from '../../../model/remote';
+import { Programmed } from '../../../model/programmed';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -24,6 +25,7 @@ export class EinheitenMaschinenComponent implements OnInit {
     errorMsg = '';
 
     private cancelConnectingAnimation: (() => void) | null = null;
+    private remoteSubMode: 'manual' | 'schedule' | 'none' = 'none';
 
     constructor(
       private rcuService: RcuService,
@@ -92,40 +94,134 @@ export class EinheitenMaschinenComponent implements OnInit {
                 } else if (updated.status === "Remote - idle") {
                   this.cancelConnectingAnimation?.();   // <--- HINZUFÜGEN
                   this.cancelConnectingAnimation = null;
-                  btnContainer.innerHTML = `
 
-                    <!-- Hinweistext über Buttons -->
-                    <div class="text-left text-[#002B49] font-semibold text-xl mb-2 pt-2 px-10 w-full">
-                      Fernsteuerung ist aktiv
 
-                      <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
-                    </div>
+                  if (this.remoteSubMode === "none") {
+                    btnContainer.innerHTML = `
 
-                    <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
-                    <div class="flex justify-center mb-3">
+                      <!-- Hinweistext über Buttons -->
+                      <div class="text-left text-[#002B49] font-semibold text-xl mb-2 pt-2 px-10 w-full">
+                        Fernsteuerung ist aktiv
 
-                        <button id="RemoteEntriegelung"
-                          style="outline: none; box-shadow: none; position: relative;"
-                          class="px-4 group flex items-center justify-center gap-4 bg-[#E0E0E0]/10 w-42 h-12 rounded-lg text-[#228B22] text-lg transition hover:text-[#006400] hover:bg-[#F2F2F2]">
+                        <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
+                      </div>
 
-                          <i class="fa-solid fa-lock-open text-3xl"></i>
-                          <span>Maschine entriegeln</span>
-
+                      <div class="flex justify-center gap-4 mb-4">
+                        <button id="RemoteManualMode" class="px-4 py-2 rounded-lg text-[#002B49] font-semibold hover:text-blue-800">
+                          Manuelle Steuerung
                         </button>
-
-                    </div>
-
-                    <!-- Zweite Zeile: Button zentriert darunter -->
-                    <div class="flex justify-center mt-2">
-
-                        <button id="StopRemoteMode"
-                          style="outline: none; box-shadow: none;"
-                          class="px-4 py-2 text-[#4D004D] font-semibold text-lg rounded-lg hover:text-[#330033] transition">
-                          <<< FERNSTEUERUNG BEENDEN >>>
+                        <button id="RemoteScheduleMode" class="px-4 py-2 rounded-lg text-[#002B49] font-semibold hover:text-blue-800">
+                          Befehle einplanen
                         </button>
+                      </div>
 
-                    </div>
-                  `;
+                      <!-- Zweite Zeile: Button zentriert darunter -->
+                      <div class="flex justify-center mt-2">
+
+                          <button id="StopRemoteMode"
+                            style="outline: none; box-shadow: none;"
+                            class="px-4 py-2 text-[#4D004D] font-semibold text-lg rounded-lg hover:text-[#330033] transition">
+                            <<< FERNSTEUERUNG BEENDEN >>>
+                          </button>
+
+                      </div>
+
+                    `;
+
+
+                  }
+
+                  if (this.remoteSubMode === "manual") {
+                    btnContainer.innerHTML = `
+
+                      <!-- Hinweistext über Buttons -->
+                      <div class="text-left text-[#002B49] font-semibold text-xl mb-2 pt-2 px-10 w-full">
+                        Fernsteuerung ist aktiv
+
+                        <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
+                      </div>
+
+                      <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
+                      <div class="flex justify-center mb-3">
+                          <button id="RemoteEntriegelung"
+                            style="outline: none; box-shadow: none; position: relative;"
+                            class="px-4 group flex items-center justify-center gap-4 bg-[#E0E0E0]/10 w-42 h-12 rounded-lg text-[#228B22] text-lg transition hover:text-[#006400] hover:bg-[#F2F2F2]">
+
+                            <i class="fa-solid fa-lock-open text-3xl"></i>
+                            <span>Maschine entriegeln</span>
+
+                          </button>
+                      </div>
+
+                      <div class="flex justify-left mt-2">
+                        <button
+                          id="ReturnMenu"
+                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                          title="Zurück"
+                        >
+                          <i class="fas fa-angles-left"></i> Zurück
+                        </button>
+                      </div>
+
+                      <!-- Zweite Zeile: Button zentriert darunter -->
+                      <div class="flex justify-center mt-2">
+
+                          <button id="StopRemoteMode"
+                            style="outline: none; box-shadow: none;"
+                            class="px-4 py-2 text-[#4D004D] font-semibold text-lg rounded-lg hover:text-[#330033] transition">
+                            <<< FERNSTEUERUNG BEENDEN >>>
+                          </button>
+
+                      </div>
+                    `;
+                  }
+
+                  if (this.remoteSubMode === "schedule") {
+                    const unlockVal = '';
+                    const lockVal = '';
+                    btnContainer.innerHTML = `
+                      <!-- Hinweistext über Buttons -->
+                      <div class="text-left text-[#002B49] font-semibold text-xl mb-2 pt-2 px-10 w-full">
+                        Fernsteuerung ist aktiv
+
+                        <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
+                      </div>
+
+                      <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
+                      <div class="flex justify-center mb-3">
+                          <button id="RemoteEntriegelung"
+                            style="outline: none; box-shadow: none; position: relative;"
+                            class="px-4 group flex items-center justify-center gap-4 bg-[#E0E0E0]/10 w-42 h-12 rounded-lg text-[#228B22] text-lg transition hover:text-[#006400] hover:bg-[#F2F2F2]">
+
+                            <i class="fa-solid fa-lock-open text-3xl"></i>
+                            <span>Maschine entriegeln</span>
+
+                          </button>
+                      </div>
+
+                      <div class="flex justify-left mt-2">
+                        <button
+                          id="ReturnMenu"
+                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                          title="Zurück"
+                        >
+                          <i class="fas fa-angles-left"></i> Zurück
+                        </button>
+                      </div>
+
+                      <!-- Zweite Zeile: Button zentriert darunter -->
+                      <div class="flex justify-center mt-2">
+
+                          <button id="StopRemoteMode"
+                            style="outline: none; box-shadow: none;"
+                            class="px-4 py-2 text-[#4D004D] font-semibold text-lg rounded-lg hover:text-[#330033] transition">
+                            <<< FERNSTEUERUNG BEENDEN >>>
+                          </button>
+
+                      </div>
+                    `;
+
+                  }
 
                   const btn1 = document.getElementById("RemoteEntriegelung");
                   if (btn1) {
@@ -141,41 +237,169 @@ export class EinheitenMaschinenComponent implements OnInit {
                     });
                   }
 
+                  const btn5 = document.getElementById("RemoteManualMode");
+                  if (btn5) {
+                    btn5.addEventListener("click", () => {
+                      this.remoteSubMode = 'manual';
+                      this.handleClick(updated);
+                    });
+                  }
+
+                  const btn6 = document.getElementById("RemoteScheduleMode");
+                  if (btn6) {
+                    btn6.addEventListener("click", () => {
+                      this.remoteSubMode = 'schedule';
+                      this.handleClick(updated);
+                    });
+                  }
+
+                  const btn7 = document.getElementById("ReturnMenu");
+                  if (btn7) {
+                    btn7.addEventListener("click", () => {
+                      this.remoteSubMode = 'none';
+                      this.handleClick(updated);
+                    });
+                  }
+
+                  const inputUnlock = document.getElementById("ScheduleUnlockTime") as HTMLInputElement | null;
+                  const inputLock = document.getElementById("ScheduleLockTime") as HTMLInputElement | null;
+
+                  const btn8 = document.getElementById("ScheduleSave");
+                  if (btn8) {
+                    btn8.addEventListener("click", () => {
+                      this.ScheduleRemote(updated.rcuId, inputUnlock, inputLock);
+                    });
+                  }
+
+
                 } else if (updated.status === "Remote - operational") {
-                  btnContainer.innerHTML = `
+                  if (this.remoteSubMode === "none") {
+                    btnContainer.innerHTML = `
 
-                    <!-- Hinweistext über Buttons -->
-                    <div class="text-left text-[#002B49] font-semibold text-xl mb-2 pt-2 px-10 w-full">
-                      Fernsteuerung ist aktiv
+                      <!-- Hinweistext über Buttons -->
+                      <div class="text-left text-[#002B49] font-semibold text-xl mb-2 pt-2 px-10 w-full">
+                        Fernsteuerung ist aktiv
 
-                      <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
-                    </div>
+                        <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
+                      </div>
 
-                    <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
-                    <div class="flex justify-center mb-3">
-
-                        <button id="RemoteVerriegelung"
-                          style="outline: none; box-shadow: none; position: relative;"
-                          class="px-4 group flex items-center justify-center gap-4 bg-[#E0E0E0]/10 w-42 h-12 rounded-lg text-red-800 text-lg transition hover:text-red-900 hover:bg-[#F2F2F2]">
-
-                          <i class="fa-solid fa-lock text-3xl"></i>
-                          <span>Maschine verriegeln</span>
-
+                      <div class="flex justify-center gap-4 mb-4">
+                        <button id="RemoteManualMode" class="px-4 py-2 rounded-lg text-[#002B49] font-semibold hover:text-blue-800">
+                          Manuelle Steuerung
                         </button>
-
-                    </div>
-
-                    <!-- Zweite Zeile: Button zentriert darunter -->
-                    <div class="flex justify-center mt-2">
-
-                        <button id="StopRemoteMode"
-                          style="outline: none; box-shadow: none;"
-                          class="px-4 py-2 text-[#4D004D] font-semibold text-lg rounded-lg hover:text-[#330033] transition">
-                          <<< FERNSTEUERUNG BEENDEN >>>
+                        <button id="RemoteScheduleMode" class="px-4 py-2 rounded-lg text-[#002B49] font-semibold hover:text-blue-800">
+                          Befehle einplanen
                         </button>
+                      </div>
 
-                    </div>
-                  `;
+                      <!-- Zweite Zeile: Button zentriert darunter -->
+                      <div class="flex justify-center mt-2">
+
+                          <button id="StopRemoteMode"
+                            style="outline: none; box-shadow: none;"
+                            class="px-4 py-2 text-[#4D004D] font-semibold text-lg rounded-lg hover:text-[#330033] transition">
+                            <<< FERNSTEUERUNG BEENDEN >>>
+                          </button>
+
+                      </div>
+
+                    `;
+
+
+                  }
+
+                  if (this.remoteSubMode === "manual") {
+                    btnContainer.innerHTML = `
+
+                      <!-- Hinweistext über Buttons -->
+                      <div class="text-left text-[#002B49] font-semibold text-xl mb-2 pt-2 px-10 w-full">
+                        Fernsteuerung ist aktiv
+
+                        <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
+                      </div>
+
+                      <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
+                      <div class="flex justify-center mb-3">
+                          <button id="RemoteVerriegelung"
+                            style="outline: none; box-shadow: none; position: relative;"
+                            class="px-4 group flex items-center justify-center gap-4 bg-[#E0E0E0]/10 w-42 h-12 rounded-lg text-red-800 text-lg transition hover:text-red-900 hover:bg-[#F2F2F2]">
+
+                            <i class="fa-solid fa-lock text-3xl"></i>
+                            <span>Maschine verriegeln</span>
+
+                          </button>
+                      </div>
+
+                      <div class="flex justify-left mt-2">
+                        <button
+                          id="ReturnMenu"
+                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                          title="Zurück"
+                        >
+                          <i class="fas fa-angles-left"></i> Zurück
+                        </button>
+                      </div>
+
+                      <!-- Zweite Zeile: Button zentriert darunter -->
+                      <div class="flex justify-center mt-2">
+
+                          <button id="StopRemoteMode"
+                            style="outline: none; box-shadow: none;"
+                            class="px-4 py-2 text-[#4D004D] font-semibold text-lg rounded-lg hover:text-[#330033] transition">
+                            <<< FERNSTEUERUNG BEENDEN >>>
+                          </button>
+
+                      </div>
+                    `;
+                  }
+
+                  if (this.remoteSubMode === "schedule") {
+                    const unlockVal = '';
+                    const lockVal = '';
+                    btnContainer.innerHTML = `
+                      <!-- Hinweistext über Buttons -->
+                      <div class="text-left text-[#002B49] font-semibold text-xl mb-2 pt-2 px-10 w-full">
+                        Fernsteuerung ist aktiv
+
+                        <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
+                      </div>
+
+                      <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
+                      <div class="flex justify-center mb-3">
+                          <button id="RemoteEntriegelung"
+                            style="outline: none; box-shadow: none; position: relative;"
+                            class="px-4 group flex items-center justify-center gap-4 bg-[#E0E0E0]/10 w-42 h-12 rounded-lg text-[#228B22] text-lg transition hover:text-[#006400] hover:bg-[#F2F2F2]">
+
+                            <i class="fa-solid fa-lock-open text-3xl"></i>
+                            <span>Maschine entriegeln</span>
+
+                          </button>
+                      </div>
+
+                      <div class="flex justify-left mt-2">
+                        <button
+                          id="ReturnMenu"
+                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                          title="Zurück"
+                        >
+                          <i class="fas fa-angles-left"></i> Zurück
+                        </button>
+                      </div>
+
+                      <!-- Zweite Zeile: Button zentriert darunter -->
+                      <div class="flex justify-center mt-2">
+
+                          <button id="StopRemoteMode"
+                            style="outline: none; box-shadow: none;"
+                            class="px-4 py-2 text-[#4D004D] font-semibold text-lg rounded-lg hover:text-[#330033] transition">
+                            <<< FERNSTEUERUNG BEENDEN >>>
+                          </button>
+
+                      </div>
+                    `;
+
+                  }
+
                   const btn3 = document.getElementById("RemoteVerriegelung");
                   if (btn3) {
                     btn3.addEventListener("click", () => {
@@ -189,6 +413,41 @@ export class EinheitenMaschinenComponent implements OnInit {
                       this.stopRemoteMode(updated.rcuId);
                     });
                   }
+
+                  const btn5 = document.getElementById("RemoteManualMode");
+                  if (btn5) {
+                    btn5.addEventListener("click", () => {
+                      this.remoteSubMode = 'manual';
+                      this.handleClick(updated);
+                    });
+                  }
+
+                  const btn6 = document.getElementById("RemoteScheduleMode");
+                  if (btn6) {
+                    btn6.addEventListener("click", () => {
+                      this.remoteSubMode = 'schedule';
+                      this.handleClick(updated);
+                    });
+                  }
+
+                  const btn7 = document.getElementById("ReturnMenu");
+                  if (btn7) {
+                    btn7.addEventListener("click", () => {
+                      this.remoteSubMode = 'none';
+                      this.handleClick(updated);
+                    });
+                  }
+
+                  const inputUnlock = document.getElementById("ScheduleUnlockTime") as HTMLInputElement | null;
+                  const inputLock = document.getElementById("ScheduleLockTime") as HTMLInputElement | null;
+
+                  const btn8 = document.getElementById("ScheduleSave");
+                  if (btn8) {
+                    btn8.addEventListener("click", () => {
+                      this.ScheduleRemote(updated.rcuId, inputUnlock, inputLock);
+                    });
+                  }
+
                 } else if (updated.status === "remote mode requested"){
 
                   // Animation zuvor stoppen, falls aktiv
@@ -326,6 +585,9 @@ export class EinheitenMaschinenComponent implements OnInit {
       const h = machine.height;
       const color = this.getStatusColor(r.status);
 
+      const unlockVal = '';
+      const lockVal   = '';
+
       Swal.fire({
         title: r.name,
         html: `
@@ -379,19 +641,79 @@ export class EinheitenMaschinenComponent implements OnInit {
                     <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
                   </div>
 
-                  <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
-                  <div class="flex justify-center mb-3">
-
-                      <button id="RemoteEntriegelung"
-                        style="outline: none; box-shadow: none; position: relative;"
-                        class="px-4 group flex items-center justify-center gap-4 bg-[#E0E0E0]/10 w-42 h-12 rounded-lg text-[#228B22] text-lg transition hover:text-[#006400] hover:bg-[#F2F2F2]">
-
-                        <i class="fa-solid fa-lock-open text-3xl"></i>
-                        <span>Maschine entriegeln</span>
-
+                  ${ (this.remoteSubMode == 'none') ? `
+                    <div class="flex justify-center gap-4 mb-4">
+                      <button id="RemoteManualMode" class="px-4 py-2 rounded-lg text-[#002B49] font-semibold hover:text-blue-800">
+                        Manuelle Steuerung
                       </button>
+                      <button id="RemoteScheduleMode" class="px-4 py-2 rounded-lg text-[#002B49] font-semibold hover:text-blue-800">
+                        Befehle einplanen
+                      </button>
+                    </div>
 
-                  </div>
+                    ` : ''
+                  }
+
+                  ${ (this.remoteSubMode == 'manual') ? `
+                      <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
+                      <div class="flex justify-center mb-3">
+
+                          <button id="RemoteEntriegelung"
+                            style="outline: none; box-shadow: none; position: relative;"
+                            class="px-4 group flex items-center justify-center gap-4 bg-[#E0E0E0]/10 w-42 h-12 rounded-lg text-[#228B22] text-lg transition hover:text-[#006400] hover:bg-[#F2F2F2]">
+
+                            <i class="fa-solid fa-lock-open text-3xl"></i>
+                            <span>Maschine entriegeln</span>
+
+                          </button>
+
+                      </div>
+
+                      <div class="flex justify-left mt-2">
+                        <button
+                          id="ReturnMenu"
+                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                          title="Zurück"
+                        >
+                          <i class="fas fa-angles-left"></i> Zurück
+                        </button>
+                      </div>
+                    ` : ''
+                  }
+
+                  ${ (this.remoteSubMode == 'schedule') ? `
+                      <div class="px-8 pt-2 space-y-3 text-left w-full">
+                        <label class="block text-sm font-semibold text-[#002B49]">
+                          Entriegelungszeitpunkt:
+                          <input id="ScheduleUnlockTime" type="datetime-local"
+                                 class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${unlockVal}">
+                        </label>
+
+                        <label class="block text-sm font-semibold text-[#002B49]">
+                          Verriegelungszeitpunkt:
+                          <input id="ScheduleLockTime" type="datetime-local"
+                                 class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${lockVal}">
+                        </label>
+
+                        <button id="ScheduleSave"
+                          class="mt-2 px-4 py-2 rounded-lg bg-[#4D004D] text-white font-semibold hover:bg-[#330033]">
+                          Befehle speichern
+                        </button>
+                      </div>
+
+                      <div class="flex justify-left mt-2">
+                        <button
+                          id="ReturnMenu"
+                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                          title="Zurück"
+                        >
+                          <i class="fas fa-angles-left"></i> Zurück
+                        </button>
+                      </div>
+
+                    ` : ''
+                  }
+
 
                   <!-- Zweite Zeile: Button zentriert darunter -->
                   <div class="flex justify-center mt-2">
@@ -415,19 +737,79 @@ export class EinheitenMaschinenComponent implements OnInit {
                   <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
                 </div>
 
-                <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
-                <div class="flex justify-center mb-3">
-
-                    <button id="RemoteVerriegelung"
-                      style="outline: none; box-shadow: none; position: relative;"
-                      class="px-4 group flex items-center justify-center gap-4 bg-[#E0E0E0]/10 w-42 h-12 rounded-lg text-red-800 text-lg transition hover:text-red-900 hover:bg-[#F2F2F2]">
-
-                      <i class="fa-solid fa-lock text-3xl"></i>
-                      <span>Maschine verriegeln</span>
-
+                ${ (this.remoteSubMode == 'none') ? `
+                  <div class="flex justify-center gap-4 mb-4">
+                    <button id="RemoteManualMode" class="px-4 py-2 rounded-lg text-[#002B49] font-semibold hover:text-blue-800">
+                      Manuelle Steuerung
                     </button>
+                    <button id="RemoteScheduleMode" class="px-4 py-2 rounded-lg text-[#002B49] font-semibold hover:text-blue-800">
+                      Befehle einplanen
+                    </button>
+                  </div>
 
-                </div>
+                  ` : ''
+                }
+
+                ${ (this.remoteSubMode == 'manual') ? `
+                    <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
+                    <div class="flex justify-center mb-3">
+
+                        <button id="RemoteVerriegelung"
+                          style="outline: none; box-shadow: none; position: relative;"
+                          class="px-4 group flex items-center justify-center gap-4 bg-[#E0E0E0]/10 w-42 h-12 rounded-lg text-red-800 text-lg transition hover:text-red-900 hover:bg-[#F2F2F2]">
+
+                          <i class="fa-solid fa-lock text-3xl"></i>
+                          <span>Maschine verriegeln</span>
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="flex justify-left mt-2">
+                      <button
+                        id="ReturnMenu"
+                        class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                        title="Zurück"
+                      >
+                        <i class="fas fa-angles-left"></i> Zurück
+                      </button>
+                    </div>
+                  ` : ''
+                }
+
+                ${ (this.remoteSubMode == 'schedule') ? `
+                    <div class="px-8 pt-2 space-y-3 text-left w-full">
+                      <label class="block text-sm font-semibold text-[#002B49]">
+                        Entriegelungszeitpunkt:
+                        <input id="ScheduleUnlockTime" type="datetime-local"
+                               class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${unlockVal}">
+                      </label>
+
+                      <label class="block text-sm font-semibold text-[#002B49]">
+                        Verriegelungszeitpunkt:
+                        <input id="ScheduleLockTime" type="datetime-local"
+                               class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${lockVal}">
+                      </label>
+
+                      <button id="ScheduleSave"
+                        class="mt-2 px-4 py-2 rounded-lg bg-[#4D004D] text-white font-semibold hover:bg-[#330033]">
+                        Befehle speichern
+                      </button>
+                    </div>
+
+                    <div class="flex justify-left mt-2">
+                      <button
+                        id="ReturnMenu"
+                        class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                        title="Zurück"
+                      >
+                        <i class="fas fa-angles-left"></i> Zurück
+                      </button>
+                    </div>
+
+                  ` : ''
+                }
 
                 <!-- Zweite Zeile: Button zentriert darunter -->
                 <div class="flex justify-center mt-2">
@@ -511,6 +893,12 @@ export class EinheitenMaschinenComponent implements OnInit {
           const btn2 = document.getElementById("StopRemoteMode");
           const btn3 = document.getElementById("RemoteVerriegelung");
           const btn4 = document.getElementById("NotVerriegelung");
+          const btn5 = document.getElementById("RemoteManualMode");
+          const btn6 = document.getElementById("RemoteScheduleMode");
+          const btn7 = document.getElementById("ReturnMenu");
+          const btn8 = document.getElementById("ScheduleSave");
+          const inputUnlock = document.getElementById("ScheduleUnlockTime") as HTMLInputElement | null;
+          const inputLock = document.getElementById("ScheduleLockTime") as HTMLInputElement | null;
 
           if (btn) {
             btn.addEventListener("click", () => {
@@ -539,6 +927,30 @@ export class EinheitenMaschinenComponent implements OnInit {
           if (btn4) {
             btn4.addEventListener("click", () => {
               this.NotfallLock(r.rcuId);
+            });
+          }
+
+          if (btn5) {
+            btn5.addEventListener("click", () => {
+              this.remoteSubMode = 'manual';
+            });
+          }
+
+          if (btn6) {
+            btn6.addEventListener("click", () => {
+              this.remoteSubMode = 'schedule';
+            });
+          }
+
+          if (btn7) {
+            btn7.addEventListener("click", () => {
+              this.remoteSubMode = 'none';
+            });
+          }
+
+          if (btn8) {
+            btn8.addEventListener("click", () => {
+              this.ScheduleRemote(r.rcuId, inputUnlock, inputLock);
             });
           }
         }
@@ -793,6 +1205,47 @@ export class EinheitenMaschinenComponent implements OnInit {
           }
         }
       });
+
+    }
+
+    ScheduleRemote(rcuId: string, inputUnlock: HTMLInputElement | null, inputLock: HTMLInputElement | null) {
+      const unlockVal = inputUnlock?.value || '';
+      const lockVal   = inputLock?.value || '';
+      if (!unlockVal && !lockVal) {
+        Swal.fire({
+          text: `Geben Sie mindestens eine Uhrzeit ein`,
+          icon: 'warning',
+          showCancelButton: true,
+          showConfirmButton: false,
+          cancelButtonText: 'OK',
+          color: '#002B49', //Textfarbe
+          buttonsStyling: false,
+          customClass: {
+            // actions: 'space-x-4 justify-center',
+            cancelButton: 'text-[#0002B49] font-semibold px-4 py-2 rounded-lg hover:text-blue-800 transition focus:outline-none focus:ring-0'
+          }
+        });
+        // alert('Bitte ID und Name eingeben.');
+        return;
+      }
+
+      const unlockTime = unlockVal || null;
+      const lockTime   = lockVal || null;
+
+
+      const newProgrammed: Programmed = {
+        rcuId: rcuId,
+        unlockTime: unlockTime,
+        lockTime: lockTime
+      };
+
+      this.rcuService.scheduleRemote(newProgrammed).subscribe({
+        next: async programm => {
+
+        },
+        error: err => { this.errorMsg = err.error?.message || 'Termin Speicherung fehlgeschlagen'; }
+      });
+
 
     }
 

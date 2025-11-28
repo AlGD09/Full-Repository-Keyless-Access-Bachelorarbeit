@@ -3,12 +3,12 @@ package com.keyless.rexroth.controller;
 import com.keyless.rexroth.dto.RCUAssignDTO;
 import com.keyless.rexroth.dto.RCUEreignisDTO;
 import com.keyless.rexroth.dto.RCURegistrationDTO;
-import com.keyless.rexroth.dto.SmartphoneUnassignDTO;
 import com.keyless.rexroth.dto.RCULockDTO;
+import com.keyless.rexroth.dto.RCUProgrammedDTO;
 import com.keyless.rexroth.entity.Anomaly;
 import com.keyless.rexroth.entity.RCU;
 import com.keyless.rexroth.entity.Event;
-import com.keyless.rexroth.repository.RCURepository;
+import com.keyless.rexroth.entity.Programmed;
 import com.keyless.rexroth.service.RCUService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -195,6 +195,22 @@ public class RCUController {
 
         return deferredResult;
     }
+
+    // Scheduled Remote Control
+    @PostMapping("/remote/schedule")
+    public ResponseEntity<?> scheduleRemote(@RequestBody RCUProgrammedDTO dto) {
+        Programmed command = rcuService.registerScheduled(dto.getRcuId(), dto.getUnlockTime(), dto.getLockTime());
+
+        return ResponseEntity.ok(command);
+    }
+
+    @DeleteMapping("/delete/schedule/{rcuId}")
+    public ResponseEntity<Void> deleteScheduleRemote(@PathVariable String rcuId) {
+        rcuService.deleteScheduleRemote(rcuId);
+        return ResponseEntity.noContent().build();
+    }
+
+
 
 
 }

@@ -5,6 +5,7 @@ import com.keyless.rexroth.repository.RCURepository;
 import com.keyless.rexroth.repository.SmartphoneRepository;
 import com.keyless.rexroth.repository.EventRepository;
 import com.keyless.rexroth.repository.AnomalyRepository;
+import com.keyless.rexroth.repository.ProgrammedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -35,6 +36,9 @@ public class RCUService {
 
     @Autowired
     private AnomalyRepository anomalyRepository;
+
+    @Autowired
+    private ProgrammedRepository programmedRepository;
 
     private static final long TIMEOUT_MILLIS = 5_000L;  // Timeout zum Antworten auf App Verriegelungsbefehl
 
@@ -291,6 +295,7 @@ public class RCUService {
                         }
 
                     }
+                    programmedRepository.deleteAllByRcuId(rcuId);  // Alle programmed remote Befehle entfernen -> SSE soll offen bleiben
                     exitFlagMap.remove(rcuId);
                 });
     }
@@ -460,6 +465,79 @@ public class RCUService {
 
         activeSinkMap.remove(rcuId);
     }
+
+    // Scheduled Remote Control
+    public Programmed registerScheduled(String rcuId, LocalDateTime unlockTime, LocalDateTime lockTime) {
+        if (rcuId == null) return null;
+
+        // Prüfen, ob bereits existiert -> ggf. Zeiten aktualisieren
+        Programmed existing = programmedRepository.findByRcuId(rcuId);
+        if (existing != null) {
+            existing.setUnlockTime(unlockTime);
+            existing.setLockTime(lockTime);
+            return programmedRepository.save(existing);
+        }
+
+        Programmed p = new Programmed();
+        p.setRcuId(rcuId);
+        p.setUnlockTime(unlockTime);
+        p.setLockTime(lockTime);
+        // s.setLastSeen(java.time.LocalDateTime.now());
+        return programmedRepository.save(p);
+    }
+
+    @Scheduled(fixedDelay = 10_000)
+    public void executeProgrammed() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Programmed> all = programmedRepository.findAll();
+        for (Programmed programmed : all) {
+            String rcuId = programmed.getRcuId();
+            LocalDateTime unlock = programmed.getUnlockTime();
+            LocalDateTime lock = programmed.getLockTime();
+
+            // Sicherheitsprüfung - nur im Remote-Modus ausführen (aktive SSE Verbindung)
+            RCU rcu = rcuRepository.findByRcuId(rcuId);
+            if (rcu == null) continue;
+            String status = rcu.getStatus();
+
+            boolean remoteActive =
+                    status.equals("Remote - idle") ||
+                    status.equals("Remote - operational");
+
+            if (!remoteActive) {
+                // Keine Befehle senden, solange Remote nicht aktiv
+                continue;
+            }
+
+            // UNLOCK
+            if (unlock != null && !now.isBefore(unlock)) {
+                sendRemoteUnlockEvent(rcuId);
+                programmed.setUnlockTime(null);
+                programmedRepository.save(programmed);
+            }
+
+            // LOCK
+            if (lock != null && !now.isBefore(lock)) {
+                sendRemoteLockEvent(rcuId);
+                programmed.setLockTime(null);
+                programmedRepository.save(programmed);
+            }
+
+            // Löschen, wenn beide ausgeführt wurden
+            if (programmed.getUnlockTime() == null && programmed.getLockTime() == null) {
+                programmedRepository.delete(programmed);
+            }
+        }
+
+    }
+
+    public void deleteScheduleRemote(String rcuId) {
+        List<Programmed> programmed = programmedRepository.findAllByRcuId(rcuId);
+        if (!programmed.isEmpty()) {
+            programmedRepository.deleteAllByRcuId(rcuId);
+        }
+    }
+
 
 
 }

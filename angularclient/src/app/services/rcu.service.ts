@@ -6,6 +6,7 @@ import { Smartphone } from '../model/smartphone';
 import { Event } from '../model/event';
 import { Anomaly } from '../model/anomaly';
 import { Remote } from '../model/remote';
+import { Programmed } from '../model/programmed';
 
 @Injectable({
   providedIn: 'root'
@@ -82,6 +83,13 @@ notfallLock(rcuId: string): Observable<Remote> {
   return this.http.post<Remote>(`${this.baseUrl}/notfall/lock/${rcuId}`, {});
 }
 
+scheduleRemote(programmed: Programmed): Observable<Programmed> {
+  return this.http.post<Programmed>(`${this.baseUrl}/remote/schedule`, programmed);
+}
+
+deleteScheduleRemote(rcuId: String) {
+  return this.http.delete(`${this.baseUrl}/delete/schedule/${rcuId}`);
+}
 
   }
 
