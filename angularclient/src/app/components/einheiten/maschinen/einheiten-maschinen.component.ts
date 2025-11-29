@@ -174,13 +174,15 @@ export class EinheitenMaschinenComponent implements OnInit {
                           </button>
                       </div>
 
-                      <div class="flex justify-left mt-2">
+                      <!-- Zurück -->
+                      <div class="px-10">
                         <button
                           id="ReturnMenu"
-                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                          class="flex items-center space-x-0 text-[15px] text-[#002B49] text-left hover:text-[#002B49] transition"
                           title="Zurück"
                         >
-                          <i class="fas fa-angles-left"></i> Zurück
+                          <i class="fas fa-caret-left text-sm"></i>
+                          <span>Zurück</span>
                         </button>
                       </div>
 
@@ -208,33 +210,44 @@ export class EinheitenMaschinenComponent implements OnInit {
                         <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
                       </div>
 
-                      <div class="px-8 pt-2 space-y-3 text-left w-full">
-                        <label class="block text-sm font-semibold text-[#002B49]">
+                      <div class="px-10 pt-2 space-y-3 text-left w-full">
+                        <label class="block text-base font-semibold text-[#002B49]">
                           Entriegelungszeitpunkt:
-                          <input id="ScheduleUnlockTime" type="datetime-local"
-                                 class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${unlockVal}">
+                          <input id="ScheduleUnlockTime"
+                                 type="datetime-local"
+                                 class="text-sm font-light mt-1 w-full border border-gray-300 rounded-md px-2 py-1"
+                                 value="${unlockVal}">
                         </label>
 
-                        <label class="block text-sm font-semibold text-[#002B49]">
+                        <label class="block text-base font-semibold text-[#002B49] pb-2">
                           Verriegelungszeitpunkt:
-                          <input id="ScheduleLockTime" type="datetime-local"
-                                 class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${lockVal}">
+                          <input id="ScheduleLockTime"
+                                 type="datetime-local"
+                                 class="text-sm font-light mt-1 w-full border border-gray-300 rounded-md px-2 py-1"
+                                 value="${lockVal}">
                         </label>
 
-                        <button id="ScheduleSave"
-                          class="mt-2 px-4 py-2 rounded-lg bg-[#4D004D] text-white font-semibold hover:bg-[#330033]">
-                          Befehle speichern
-                        </button>
-                      </div>
+                        <!-- Button-Zeile -->
+                        <div class="flex justify-between items-center mb-4">
 
-                      <div class="flex justify-left mt-2">
-                        <button
-                          id="ReturnMenu"
-                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
-                          title="Zurück"
-                        >
-                          <i class="fas fa-angles-left"></i> Zurück
-                        </button>
+                          <!-- Zurück -->
+                          <button
+                            id="ReturnMenu"
+                            class="flex items-center space-x-0 text-[15px] text-[#002B49] text-left hover:text-[#002B49] transition"
+                            title="Zurück"
+                          >
+                            <i class="fas fa-caret-left text-sm"></i>
+                            <span>Zurück</span>
+                          </button>
+
+                          <!-- Speichern -->
+                          <button id="ScheduleSave"
+                            class="bg-[#002B49] hover:bg-blue-700 text-white text-base font-semibold w-44 h-7 rounded-lg shadow transition">
+                            Befehle speichern
+                          </button>
+                        </div>
+
+
                       </div>
 
                       <!-- Zweite Zeile: Button zentriert darunter -->
@@ -363,13 +376,15 @@ export class EinheitenMaschinenComponent implements OnInit {
                           </button>
                       </div>
 
-                      <div class="flex justify-left mt-2">
+                      <!-- Zurück -->
+                      <div class="px-10">
                         <button
                           id="ReturnMenu"
-                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                          class="flex items-center space-x-0 text-[15px] text-[#002B49] text-left hover:text-[#002B49] transition"
                           title="Zurück"
                         >
-                          <i class="fas fa-angles-left"></i> Zurück
+                          <i class="fas fa-caret-left text-sm"></i>
+                          <span>Zurück</span>
                         </button>
                       </div>
 
@@ -398,33 +413,44 @@ export class EinheitenMaschinenComponent implements OnInit {
                       </div>
 
                       <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
-                      <div class="px-8 pt-2 space-y-3 text-left w-full">
-                        <label class="block text-sm font-semibold text-[#002B49]">
+                      <div class="px-10 pt-2 space-y-3 text-left w-full">
+                        <label class="block text-base font-semibold text-[#002B49]">
                           Entriegelungszeitpunkt:
-                          <input id="ScheduleUnlockTime" type="datetime-local"
-                                 class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${unlockVal}">
+                          <input id="ScheduleUnlockTime"
+                                 type="datetime-local"
+                                 class="text-sm font-light mt-1 w-full border border-gray-300 rounded-md px-2 py-1"
+                                 value="${unlockVal}">
                         </label>
 
-                        <label class="block text-sm font-semibold text-[#002B49]">
+                        <label class="block text-base font-semibold text-[#002B49] pb-2">
                           Verriegelungszeitpunkt:
-                          <input id="ScheduleLockTime" type="datetime-local"
-                                 class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${lockVal}">
+                          <input id="ScheduleLockTime"
+                                 type="datetime-local"
+                                 class="text-sm font-light mt-1 w-full border border-gray-300 rounded-md px-2 py-1"
+                                 value="${lockVal}">
                         </label>
 
-                        <button id="ScheduleSave"
-                          class="mt-2 px-4 py-2 rounded-lg bg-[#4D004D] text-white font-semibold hover:bg-[#330033]">
-                          Befehle speichern
-                        </button>
-                      </div>
+                        <!-- Button-Zeile -->
+                        <div class="flex justify-between items-center mb-4">
 
-                      <div class="flex justify-left mt-2">
-                        <button
-                          id="ReturnMenu"
-                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
-                          title="Zurück"
-                        >
-                          <i class="fas fa-angles-left"></i> Zurück
-                        </button>
+                          <!-- Zurück -->
+                          <button
+                            id="ReturnMenu"
+                            class="flex items-center space-x-0 text-[15px] text-[#002B49] text-left hover:text-[#002B49] transition"
+                            title="Zurück"
+                          >
+                            <i class="fas fa-caret-left text-sm"></i>
+                            <span>Zurück</span>
+                          </button>
+
+                          <!-- Speichern -->
+                          <button id="ScheduleSave"
+                            class="bg-[#002B49] hover:bg-blue-700 text-white text-base font-semibold w-44 h-7 rounded-lg shadow transition">
+                            Befehle speichern
+                          </button>
+                        </div>
+
+
                       </div>
 
                       <!-- Zweite Zeile: Button zentriert darunter -->
@@ -630,7 +656,7 @@ export class EinheitenMaschinenComponent implements OnInit {
       const img = machine.src;
       const h = machine.height;
       const color = this.getStatusColor(r.status);
-
+      const mode = this.remoteSubMode;
       const unlockVal = '';
       const lockVal   = '';
 
@@ -687,7 +713,7 @@ export class EinheitenMaschinenComponent implements OnInit {
                     <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
                   </div>
 
-                  ${ (this.remoteSubMode == 'none') ? `
+                  ${ (mode == 'none') ? `
                     <div class="flex justify-center gap-4 mb-4">
                       <button id="RemoteManualMode" class="px-4 py-2 rounded-lg text-[#002B49] font-semibold hover:text-blue-800">
                         Manuelle Steuerung
@@ -700,7 +726,7 @@ export class EinheitenMaschinenComponent implements OnInit {
                     ` : ''
                   }
 
-                  ${ (this.remoteSubMode == 'manual') ? `
+                  ${ (mode == 'manual') ? `
                       <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
                       <div class="flex justify-center mb-3">
 
@@ -715,47 +741,64 @@ export class EinheitenMaschinenComponent implements OnInit {
 
                       </div>
 
-                      <div class="flex justify-left mt-2">
+                      <!-- Zurück -->
+                      <div class="px-10">
                         <button
                           id="ReturnMenu"
-                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                          class="flex items-center space-x-0 text-[15px] text-[#002B49] text-left hover:text-[#002B49] transition"
                           title="Zurück"
                         >
-                          <i class="fas fa-angles-left"></i> Zurück
+                          <i class="fas fa-caret-left text-sm"></i>
+                          <span>Zurück</span>
                         </button>
                       </div>
                     ` : ''
                   }
 
-                  ${ (this.remoteSubMode == 'schedule') ? `
-                      <div class="px-8 pt-2 space-y-3 text-left w-full">
-                        <label class="block text-sm font-semibold text-[#002B49]">
+                  ${ (mode == 'schedule') ? `
+
+
+                      <div class="px-10 pt-2 space-y-3 text-left w-full">
+                        <label class="block text-base font-semibold text-[#002B49]">
                           Entriegelungszeitpunkt:
-                          <input id="ScheduleUnlockTime" type="datetime-local"
-                                 class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${unlockVal}">
+                          <input id="ScheduleUnlockTime"
+                                 type="datetime-local"
+                                 class="text-sm font-light mt-1 w-full border border-gray-300 rounded-md px-2 py-1"
+                                 value="${unlockVal}">
                         </label>
 
-                        <label class="block text-sm font-semibold text-[#002B49]">
+                        <label class="block text-base font-semibold text-[#002B49] pb-2">
                           Verriegelungszeitpunkt:
-                          <input id="ScheduleLockTime" type="datetime-local"
-                                 class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${lockVal}">
+                          <input id="ScheduleLockTime"
+                                 type="datetime-local"
+                                 class="text-sm font-light mt-1 w-full border border-gray-300 rounded-md px-2 py-1"
+                                 value="${lockVal}">
                         </label>
 
-                        <button id="ScheduleSave"
-                          class="mt-2 px-4 py-2 rounded-lg bg-[#4D004D] text-white font-semibold hover:bg-[#330033]">
-                          Befehle speichern
-                        </button>
+                        <!-- Button-Zeile -->
+                        <div class="flex justify-between items-center mb-4">
+
+                          <!-- Zurück -->
+                          <button
+                            id="ReturnMenu"
+                            class="flex items-center space-x-0 text-[15px] text-[#002B49] text-left hover:text-[#002B49] transition"
+                            title="Zurück"
+                          >
+                            <i class="fas fa-caret-left text-sm"></i>
+                            <span>Zurück</span>
+                          </button>
+
+                          <!-- Speichern -->
+                          <button id="ScheduleSave"
+                            class="bg-[#002B49] hover:bg-blue-700 text-white text-base font-semibold w-44 h-7 rounded-lg shadow transition">
+                            Befehle speichern
+                          </button>
+                        </div>
+
+
                       </div>
 
-                      <div class="flex justify-left mt-2">
-                        <button
-                          id="ReturnMenu"
-                          class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
-                          title="Zurück"
-                        >
-                          <i class="fas fa-angles-left"></i> Zurück
-                        </button>
-                      </div>
+
 
                     ` : ''
                   }
@@ -783,7 +826,7 @@ export class EinheitenMaschinenComponent implements OnInit {
                   <div style="border-bottom: 1px dotted #d1d5db; margin: 5px 0 22px 0; width: 100%; display: block;"></div>
                 </div>
 
-                ${ (this.remoteSubMode == 'none') ? `
+                ${ (mode == 'none') ? `
                   <div class="flex justify-center gap-4 mb-4">
                     <button id="RemoteManualMode" class="px-4 py-2 rounded-lg text-[#002B49] font-semibold hover:text-blue-800">
                       Manuelle Steuerung
@@ -796,7 +839,7 @@ export class EinheitenMaschinenComponent implements OnInit {
                   ` : ''
                 }
 
-                ${ (this.remoteSubMode == 'manual') ? `
+                ${ (mode == 'manual') ? `
                     <!-- Erste Zeile: Entriegeln / Verriegeln nebeneinander -->
                     <div class="flex justify-center mb-3">
 
@@ -812,46 +855,59 @@ export class EinheitenMaschinenComponent implements OnInit {
                     </div>
 
 
-                    <div class="flex justify-left mt-2">
+                    <!-- Zurück -->
+                    <div class="px-10">
                       <button
                         id="ReturnMenu"
-                        class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
+                        class="flex items-center space-x-0 text-[15px] text-[#002B49] text-left hover:text-[#002B49] transition"
                         title="Zurück"
                       >
-                        <i class="fas fa-angles-left"></i> Zurück
+                        <i class="fas fa-caret-left text-sm"></i>
+                        <span>Zurück</span>
                       </button>
                     </div>
                   ` : ''
                 }
 
-                ${ (this.remoteSubMode == 'schedule') ? `
-                    <div class="px-8 pt-2 space-y-3 text-left w-full">
-                      <label class="block text-sm font-semibold text-[#002B49]">
+                ${ (mode == 'schedule') ? `
+                    <div class="px-10 pt-2 space-y-3 text-left w-full">
+                      <label class="block text-base font-semibold text-[#002B49]">
                         Entriegelungszeitpunkt:
-                        <input id="ScheduleUnlockTime" type="datetime-local"
-                               class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${unlockVal}">
+                        <input id="ScheduleUnlockTime"
+                               type="datetime-local"
+                               class="text-sm font-light mt-1 w-full border border-gray-300 rounded-md px-2 py-1"
+                               value="${unlockVal}">
                       </label>
 
-                      <label class="block text-sm font-semibold text-[#002B49]">
+                      <label class="block text-base font-semibold text-[#002B49] pb-2">
                         Verriegelungszeitpunkt:
-                        <input id="ScheduleLockTime" type="datetime-local"
-                               class="mt-1 w-full border border-gray-300 rounded-md px-2 py-1" value="${lockVal}">
+                        <input id="ScheduleLockTime"
+                               type="datetime-local"
+                               class="text-sm font-light mt-1 w-full border border-gray-300 rounded-md px-2 py-1"
+                               value="${lockVal}">
                       </label>
 
-                      <button id="ScheduleSave"
-                        class="mt-2 px-4 py-2 rounded-lg bg-[#4D004D] text-white font-semibold hover:bg-[#330033]">
-                        Befehle speichern
-                      </button>
-                    </div>
+                      <!-- Button-Zeile -->
+                      <div class="flex justify-between items-center mb-4">
 
-                    <div class="flex justify-left mt-2">
-                      <button
-                        id="ReturnMenu"
-                        class="mt-auto text-[#002B49] hover:text-[#002B49] transition"
-                        title="Zurück"
-                      >
-                        <i class="fas fa-angles-left"></i> Zurück
-                      </button>
+                        <!-- Zurück -->
+                        <button
+                          id="ReturnMenu"
+                          class="flex items-center space-x-0 text-[15px] text-[#002B49] text-left hover:text-[#002B49] transition"
+                          title="Zurück"
+                        >
+                          <i class="fas fa-caret-left text-sm"></i>
+                          <span>Zurück</span>
+                        </button>
+
+                        <!-- Speichern -->
+                        <button id="ScheduleSave"
+                          class="bg-[#002B49] hover:bg-blue-700 text-white text-base font-semibold w-44 h-7 rounded-lg shadow transition">
+                          Befehle speichern
+                        </button>
+                      </div>
+
+
                     </div>
 
                   ` : ''
@@ -1263,8 +1319,8 @@ export class EinheitenMaschinenComponent implements OnInit {
     }
 
     ScheduleRemote(rcuId: string, inputUnlock: HTMLInputElement | null, inputLock: HTMLInputElement | null) {
-      this.setRemoteSubMode('none');
-      this.resumeAutoRefresh();
+      // this.setRemoteSubMode('none');
+      // this.resumeAutoRefresh();
       const unlockVal = inputUnlock?.value || '';
       const lockVal   = inputLock?.value || '';
       if (!unlockVal && !lockVal) {
