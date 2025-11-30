@@ -91,6 +91,14 @@ deleteScheduleRemote(rcuId: string) {
   return this.http.delete(`${this.baseUrl}/delete/schedule/${rcuId}`);
 }
 
+deleteUnlockTime(rcuId: string) {
+  return this.http.delete(`${this.baseUrl}/delete/unlock/${rcuId}`);
+}
+
+deleteLockTime(rcuId: string) {
+  return this.http.delete(`${this.baseUrl}/delete/lock/${rcuId}`);
+}
+
 getScheduledRcu(rcuId: string): Observable<Programmed[]> {
   return this.http.get<Programmed[]>(`${this.baseUrl}/schedule/${rcuId}`);
 }

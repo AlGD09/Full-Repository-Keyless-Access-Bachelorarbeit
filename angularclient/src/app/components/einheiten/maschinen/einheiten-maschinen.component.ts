@@ -140,26 +140,64 @@ export class EinheitenMaschinenComponent implements OnInit {
                           infoContainer.innerHTML = `
                           `;
                         } else {
+                          const unlockText = this.formatDateTime(setUnlock);
+                          const lockText = this.formatDateTime(setLock);
                           infoContainer.innerHTML = `
-
                             <div class="mt-8 border-l-4 border-blue-600 rounded text-[15px] text-gray-700">
                               <div class="text-left text-[#002B49] font-semibold text-lg pl-4 pt-3 mb-2 w-full">
                                 Geplante Befehle
                               </div>
-                              <p class="pl-5 mb-2 text-left">
-                                <span class="text-base text-[#002B49] text-left font-medium hover:text-[#002B49] transition">
-                                  Entriegelungszeitpunkt:
-                                </span>
-                                <span class="text-gray-900 font-light px-3"> ${this.formatDateTime(setUnlock)} </span>
-                              </p>
-                              <p class="pl-5 pb-4 text-left">
-                                <span class="text-base text-[#002B49] text-left font-medium hover:text-[#002B49] transition">
-                                  Verriegelungszeitpunkt:
-                                </span>
-                                <span class="text-gray-900 font-light px-3"> ${this.formatDateTime(setLock)} </span>
-                              </p>
+
+                              <div class="flex items-center justify-between">
+
+                                <div class="flex flex-col justify-center">
+                                  <p class="pl-5 mb-2 text-left">
+                                    <span class="text-base text-[#002B49] font-medium">Entriegelungszeitpunkt:</span>
+                                    <button id="unlockTimeBtn"
+                                      class="text-gray-900 font-light px-3 ${unlockText !== "-" ? "hover:text-red-600 cursor-pointer" : "cursor-default"}"
+                                      ${unlockText === "-" ? "disabled" : ""}>
+                                      ${unlockText}
+                                    </button>
+                                  </p>
+
+                                  <p class="pl-5 text-left">
+                                    <span class="text-base text-[#002B49] font-medium">Verriegelungszeitpunkt:</span>
+                                    <button id="lockTimeBtn"
+                                      class="text-gray-900 font-light px-3 ${lockText !== "-" ? "hover:text-red-600 cursor-pointer" : "cursor-default"}"
+                                      ${lockText === "-" ? "disabled" : ""}>
+                                      ${lockText}
+                                    </button>
+                                  </p>
+                                </div>
+
+                                <button id="deleteTime" class="text-red-600 hover:text-red-800 text-xl flex items-center">
+                                  <i class="fas fa-trash"></i>
+                                </button>
+
+                              </div>
                             </div>
                           `;
+
+                          const btn9 = document.getElementById("deleteTime");
+                          if (btn9) {
+                            btn9.addEventListener("click", () => {
+                              this.deleteTimes(updated.rcuId);
+                            });
+                          }
+
+                          // Nur klicken, wenn Wert ≠ "-"
+                          if (unlockText !== "-") {
+                            document.getElementById("unlockTimeBtn")?.addEventListener("click", () => {
+                              this.deleteUnlock(updated.rcuId);
+                            });
+                          }
+
+                          if (lockText !== "-") {
+                            document.getElementById("lockTimeBtn")?.addEventListener("click", () => {
+                              this.deleteLock(updated.rcuId);
+                            });
+                          }
+
                         }
                       }
 
@@ -382,6 +420,8 @@ export class EinheitenMaschinenComponent implements OnInit {
                   if (btn5) {
                     btn5.addEventListener("click", () => {
                       this.setRemoteSubMode('manual');
+                      // this.handleClick(updated); // Unbekannter Glitch lösen?
+                      // this.autoRefreshPaused = true;
 
                     });
                   }
@@ -762,6 +802,8 @@ export class EinheitenMaschinenComponent implements OnInit {
       const s = this.schedules.find(x => x.rcuId === r.rcuId);
       const setUnlock = s?.unlockTime ?? "-";
       const setLock = s?.lockTime ?? "-";
+      const unlockText = this.formatDateTime(setUnlock);
+      const lockText = this.formatDateTime(setLock);
       const unlockVal = '';
       const lockVal   = '';
 
@@ -1082,22 +1124,39 @@ export class EinheitenMaschinenComponent implements OnInit {
 
             <div id="schedule-info-container">
                 ${ (setUnlock != "-" && setLock != "-" && (r.status == "Remote - operational" || r.status == "Remote - idle")) ? `
+
                   <div class="mt-8 border-l-4 border-blue-600 rounded text-[15px] text-gray-700">
                     <div class="text-left text-[#002B49] font-semibold text-lg pl-4 pt-3 mb-2 w-full">
                       Geplante Befehle
                     </div>
-                    <p class="pl-5 mb-2 text-left">
-                      <span class="text-base text-[#002B49] text-left font-medium hover:text-[#002B49] transition">
-                        Entriegelungszeitpunkt:
-                      </span>
-                      <span class="text-gray-900 font-light px-3"> ${this.formatDateTime(setUnlock)} </span>
-                    </p>
-                    <p class="pl-5 pb-4 text-left">
-                      <span class="text-base text-[#002B49] text-left font-medium hover:text-[#002B49] transition">
-                        Verriegelungszeitpunkt:
-                      </span>
-                      <span class="text-gray-900 font-light px-3"> ${this.formatDateTime(setLock)} </span>
-                    </p>
+
+                    <div class="flex items-center justify-between">
+
+                      <div class="flex flex-col justify-center">
+                        <p class="pl-5 mb-2 text-left">
+                          <span class="text-base text-[#002B49] font-medium">Entriegelungszeitpunkt:</span>
+                          <button id="unlockTimeBtn"
+                            class="text-gray-900 font-light px-3 ${unlockText !== "-" ? "hover:text-red-600 cursor-pointer" : "cursor-default"}"
+                            ${unlockText === "-" ? "disabled" : ""}>
+                            ${unlockText}
+                          </button>
+                        </p>
+
+                        <p class="pl-5 text-left">
+                          <span class="text-base text-[#002B49] font-medium">Verriegelungszeitpunkt:</span>
+                          <button id="lockTimeBtn"
+                            class="text-gray-900 font-light px-3 ${lockText !== "-" ? "hover:text-red-600 cursor-pointer" : "cursor-default"}"
+                            ${lockText === "-" ? "disabled" : ""}>
+                            ${lockText}
+                          </button>
+                        </p>
+                      </div>
+
+                      <button id="deleteTime" class="text-red-600 hover:text-red-800 text-xl flex items-center">
+                        <i class="fas fa-trash"></i>
+                      </button>
+
+                    </div>
                   </div>
                   ` : ''
                 }
@@ -1146,6 +1205,7 @@ export class EinheitenMaschinenComponent implements OnInit {
           const btn6 = document.getElementById("RemoteScheduleMode");
           const btn7 = document.getElementById("ReturnMenu");
           const btn8 = document.getElementById("ScheduleSave");
+          const btn9 = document.getElementById("deleteTime");
           const inputUnlock = document.getElementById("ScheduleUnlockTime") as HTMLInputElement | null;
           const inputLock = document.getElementById("ScheduleLockTime") as HTMLInputElement | null;
 
@@ -1182,6 +1242,7 @@ export class EinheitenMaschinenComponent implements OnInit {
           if (btn5) {
             btn5.addEventListener("click", () => {
               this.setRemoteSubMode('manual');
+              this.handleClick(r);
             });
           }
 
@@ -1204,6 +1265,26 @@ export class EinheitenMaschinenComponent implements OnInit {
               this.ScheduleRemote(r.rcuId, inputUnlock, inputLock);
             });
           }
+
+          if (btn9) {
+            btn9.addEventListener("click", () => {
+              this.deleteTimes(r.rcuId);
+            });
+          }
+
+          // Nur klicken, wenn Wert nicht "-"
+          if (unlockText !== "-") {
+            document.getElementById("unlockTimeBtn")?.addEventListener("click", () => {
+              this.deleteUnlock(r.rcuId);
+            });
+          }
+
+          if (lockText !== "-") {
+            document.getElementById("lockTimeBtn")?.addEventListener("click", () => {
+              this.deleteLock(r.rcuId);
+            });
+          }
+
         }
       });
     }
@@ -1499,6 +1580,35 @@ export class EinheitenMaschinenComponent implements OnInit {
         error: err => { this.errorMsg = err.error?.message || 'Termin Speicherung fehlgeschlagen'; }
       });
 
+
+    }
+
+    deleteTimes(rcuId: string) {
+      this.rcuService.deleteScheduleRemote(rcuId).subscribe({
+        next: () => {
+
+        },
+        error: err => { }
+      });
+    }
+
+    deleteUnlock(rcuId: string) {
+      this.rcuService.deleteUnlockTime(rcuId).subscribe({
+        next: () => {
+
+        },
+        error: err => { }
+      });
+
+    }
+
+    deleteLock(rcuId: string) {
+      this.rcuService.deleteLockTime(rcuId).subscribe({
+        next: () => {
+
+        },
+        error: err => { }
+      });
 
     }
 

@@ -163,6 +163,7 @@ public class RCUService {
 
         if (result.equals("Fernsteuerung deaktiviert")) {
             rcu.setStatus("idle");
+            lastStatusPoll.put(rcuId, LocalDateTime.now());  // Kurzer offline nach exit verhindern
             rcuRepository.save(rcu);
             confirmLock(rcuId);
         }
@@ -297,7 +298,7 @@ public class RCUService {
                         }
 
                     }
-                    programmedRepository.deleteAllByRcuId(rcuId);  // Alle programmed remote Befehle entfernen -> SSE soll offen bleiben
+                    deleteScheduleRemote(rcuId);  // Alle programmed remote Befehle entfernen -> SSE soll offen bleiben
                     exitFlagMap.remove(rcuId);
                 });
     }
@@ -380,6 +381,9 @@ public class RCUService {
 
     public String getRcuStatus(String rcuId) {
         RCU rcu = rcuRepository.findByRcuId(rcuId);
+        if (rcu == null) {
+            return "Not-Registered Machine";
+        }
         if (!rcu.getStatus().equals("remote mode requested")) {
             rcu.setStatus("idle");
             rcuRepository.save(rcu);
@@ -535,8 +539,24 @@ public class RCUService {
 
     public void deleteScheduleRemote(String rcuId) {
         List<Programmed> programmed = programmedRepository.findAllByRcuId(rcuId);
-        if (!programmed.isEmpty()) {
-            programmedRepository.deleteAllByRcuId(rcuId);
+        for (Programmed p : programmed) {
+            programmedRepository.delete(p);
+        }
+    }
+
+    public void deleteScheduleUnlock(String rcuId) {
+        List<Programmed> programmed = programmedRepository.findAllByRcuId(rcuId);
+        for (Programmed p : programmed) {
+            p.setUnlockTime(null);
+            programmedRepository.save(p);
+        }
+    }
+
+    public void deleteScheduleLock(String rcuId) {
+        List<Programmed> programmed = programmedRepository.findAllByRcuId(rcuId);
+        for (Programmed p : programmed) {
+            p.setLockTime(null);
+            programmedRepository.save(p);
         }
     }
 

@@ -210,6 +210,18 @@ public class RCUController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/delete/unlock/{rcuId}")
+    public ResponseEntity<Void> deleteScheduleUnlock(@PathVariable String rcuId) {
+        rcuService.deleteScheduleUnlock(rcuId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/delete/lock/{rcuId}")
+    public ResponseEntity<Void> deleteScheduleLock(@PathVariable String rcuId) {
+        rcuService.deleteScheduleLock(rcuId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/schedule/{rcuId}")
     public ResponseEntity<List<Programmed>> getScheduledRcu(@PathVariable String rcuId) {
         List<Programmed> programmed = rcuService.getScheduledForRcu(rcuId);
