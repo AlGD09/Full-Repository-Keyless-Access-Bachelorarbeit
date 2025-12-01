@@ -1214,8 +1214,8 @@ export class EinheitenMaschinenComponent implements OnInit {
         },
 
         didClose: () => {
-          this.setRemoteSubMode('none');
-          this.resumeAutoRefresh();
+          //this.setRemoteSubMode('none');  -> none = handle beginnt mit none, aber nun manual aus anderer Maschine -> glitch bei mehreren
+          // this.resumeAutoRefresh();
         },
 
 
