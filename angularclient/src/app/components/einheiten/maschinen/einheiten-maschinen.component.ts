@@ -57,7 +57,7 @@ export class EinheitenMaschinenComponent implements OnInit {
       return map[rcuId] ?? null;
     }
 
-    private deleteRemoteSubMode(rcuId: string) {
+    private deleteRemoteSubMode(rcuId: string) { // Wird nicht verwendet, kann aber später beim Löschen einer Maschine benutzt werden (grosses System)
       const map = JSON.parse(localStorage.getItem("remoteSubMode") || "{}");
 
       if (rcuId in map) {
@@ -67,7 +67,7 @@ export class EinheitenMaschinenComponent implements OnInit {
     }
 
 
-
+    // Beim Anzeigen im unteren Teil
     private formatDateTime(value: string | null): string {
       if (!value || value === "-") return "-";
 
@@ -246,18 +246,22 @@ export class EinheitenMaschinenComponent implements OnInit {
               const btnContainer = document.getElementById("remote-btn-container");
 
               // Back Up Aktualisierungen, wenn autoRefreshPaused set ist
-              if (updated.status === "Remote - operational" && this.isAutoRefreshPaused(updated.rcuId) && this.getRemoteSubMode(updated.rcuId) === "manual") {
+              /*if (updated.status === "Remote - operational" && this.isAutoRefreshPaused(updated.rcuId) && this.getRemoteSubMode(updated.rcuId) === "manual") {
                 this.handleClick(updated);
                 this.setAutoRefreshPaused(updated.rcuId, false);
+              }*/
+
+              if (this.getRemoteSubMode(updated.rcuId) === "schedule" && !this.isAutoRefreshPaused(updated.rcuId)) {
+                this.setAutoRefreshPaused(updated.rcuId, true);
               }
 
               if (updated.status === "offline" && this.isAutoRefreshPaused(updated.rcuId)) {
-                this.handleClick(updated);
+                // this.handleClick(updated);
                 this.setAutoRefreshPaused(updated.rcuId, false);
               }
 
               if (updated.status === "idle" && this.isAutoRefreshPaused(updated.rcuId)) {
-                this.handleClick(updated);
+                // this.handleClick(updated);
                 this.setAutoRefreshPaused(updated.rcuId, false);
               }
 
@@ -442,7 +446,7 @@ export class EinheitenMaschinenComponent implements OnInit {
                   const btn1 = document.getElementById("RemoteEntriegelung");
                   if (btn1) {
                     btn1.addEventListener("click", () => {
-                      this.setAutoRefreshPaused(updated.rcuId, false);
+                      // this.setAutoRefreshPaused(updated.rcuId, false);
                       this.RemoteUnlock(updated.rcuId);
 
                     });
@@ -452,7 +456,7 @@ export class EinheitenMaschinenComponent implements OnInit {
                   if (btn2) {
                     btn2.addEventListener("click", () => {
                       this.setRemoteSubMode(updated.rcuId, 'none');
-                      this.setAutoRefreshPaused(updated.rcuId, false);
+                      // this.setAutoRefreshPaused(updated.rcuId, false);
                       this.stopRemoteMode(updated.rcuId);
                     });
                   }
@@ -463,8 +467,8 @@ export class EinheitenMaschinenComponent implements OnInit {
 
 
                       this.setRemoteSubMode(updated.rcuId, 'manual');
-                      this.handleClick(updated);
-                      this.setAutoRefreshPaused(updated.rcuId, true);
+                      // this.handleClick(updated);
+                      // this.setAutoRefreshPaused(updated.rcuId, true);
                       //this.handleClick(updated);
                       //this.autoRefreshPaused = true;
                       // await new Promise(resolve => setTimeout(resolve, 10000));
@@ -480,8 +484,9 @@ export class EinheitenMaschinenComponent implements OnInit {
                   if (btn6) {
                     btn6.addEventListener("click", () => {
                       this.setRemoteSubMode(updated.rcuId, 'schedule');
-                      this.handleClick(updated);
                       this.setAutoRefreshPaused(updated.rcuId, true);
+                      this.handleClick(updated);
+
 
                     });
                   }
@@ -491,7 +496,7 @@ export class EinheitenMaschinenComponent implements OnInit {
                     btn7.addEventListener("click", () => {
                       this.setAutoRefreshPaused(updated.rcuId, false);
                       this.setRemoteSubMode(updated.rcuId, 'none');
-                      this.handleClick(updated);
+                      // this.handleClick(updated);
                     });
                   }
 
@@ -666,7 +671,7 @@ export class EinheitenMaschinenComponent implements OnInit {
                   if (btn2) {
                     btn2.addEventListener("click", () => {
                       this.setRemoteSubMode(updated.rcuId, 'none');
-                      this.setAutoRefreshPaused(updated.rcuId, false);
+                      // this.setAutoRefreshPaused(updated.rcuId, false);
                       this.stopRemoteMode(updated.rcuId);
                     });
                   }
@@ -683,8 +688,8 @@ export class EinheitenMaschinenComponent implements OnInit {
                   if (btn6) {
                     btn6.addEventListener("click", () => {
                       this.setRemoteSubMode(updated.rcuId, 'schedule');
-                      this.handleClick(updated);
                       this.setAutoRefreshPaused(updated.rcuId, true);
+                      this.handleClick(updated);
 
                     });
                   }
@@ -692,9 +697,9 @@ export class EinheitenMaschinenComponent implements OnInit {
                   const btn7 = document.getElementById("ReturnMenu");
                   if (btn7) {
                     btn7.addEventListener("click", () => {
-                      this.setAutoRefreshPaused(updated.rcuId, false);
                       this.setRemoteSubMode(updated.rcuId, 'none');
-                      this.handleClick(updated);
+                      this.setAutoRefreshPaused(updated.rcuId, false);
+                      // this.handleClick(updated);
                     });
                   }
 
@@ -1284,7 +1289,7 @@ export class EinheitenMaschinenComponent implements OnInit {
 
           if (btn1) {
             btn1.addEventListener("click", () => {
-              this.setAutoRefreshPaused(r.rcuId, false);
+              // this.setAutoRefreshPaused(r.rcuId, false);
               this.RemoteUnlock(r.rcuId);
             });
           }
@@ -1317,6 +1322,7 @@ export class EinheitenMaschinenComponent implements OnInit {
           if (btn6) {
             btn6.addEventListener("click", () => {
               this.setRemoteSubMode(r.rcuId, 'schedule');
+              this.setAutoRefreshPaused(r.rcuId, true);
 
             });
           }
