@@ -371,7 +371,7 @@ public class RCUService {
                 addNewEvent(rcuId, deviceName, deviceId, "Ungewöhnliche Verriegelung");
             }
             RCU rcu = rcuRepository.findByRcuId(rcuId);
-            if (rcu != null) {
+            if (rcu != null && !event.getResult().equals("Zugang verweigert")) {
                 rcu.setStatus("offline");
                 rcuRepository.save(rcu);
             }
