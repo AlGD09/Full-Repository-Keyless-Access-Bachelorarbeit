@@ -1,0 +1,24 @@
+<div class="relative w-full h-full bg-white rounded-xl border border-[#f7f7f7] flex flex-col">
+
+  <!-- Button-Leiste oben (z-10 bringt es über das Graph) -->
+  <div class="absolute bottom-2 left-2 flex gap-2 z-10">
+
+    <button
+      (click)="reloadGraph()"
+      class="px-3 py-1 text-xs text-[#002B49] hover:text-blue-700 transition">
+      Neu laden
+    </button>
+
+    <button
+      (click)="resetView()"
+      class="px-3 py-1 text-xs text-[#002B49] hover:text-blue-700 transition">
+      Zentrieren
+    </button>
+  </div>
+
+  <!-- SVG-Container -->
+  <div class="w-full h-full flex justify-center items-center">
+    <svg class="cascade-graph w-full h-full"></svg>
+  </div>
+
+</div>

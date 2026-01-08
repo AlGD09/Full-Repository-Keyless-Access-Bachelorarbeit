@@ -1,0 +1,33 @@
+<!-- Hauptbereich mit Top-Navigation -->
+<div class="flex flex-col h-full">
+  <!-- Obere Navbar -->
+  <nav class="bg-white flex justify-between px-4 py-3">
+    <a
+      routerLink="./"
+      routerLinkActive="text-blue-800 border-b-2 border-blue-800"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="flex items-center justify-center px-3 py-2 w-[30%] rounded-lg hover:text-blue-700 hover:no-underline"
+    >
+      <i class="fas fa-user w-10 text-gray-500"></i> Benutzer
+    </a>
+    <a
+      routerLink="smartphones"
+      routerLinkActive="text-blue-800 border-b-2 border-blue-800"
+      class="flex items-center justify-center px-3 py-2 w-[30%] rounded-lg hover:text-blue-700 hover:no-underline"
+    >
+      <i class="fas fa-mobile-screen w-10 text-gray-500"></i> Smartphones
+    </a>
+    <a
+      routerLink="maschinen"
+      routerLinkActive="text-blue-800 border-b-2 border-blue-800"
+      class="flex items-center justify-center px-3 py-2 w-[30%] rounded-lg hover:text-blue-700 hover:no-underline"
+    >
+      <i class="fas fa-gear w-10 text-gray-500"></i> Maschinen
+    </a>
+  </nav>
+
+  <!-- Inhalt -->
+  <main class="flex-1 overflow-y-auto">
+    <router-outlet></router-outlet>
+  </main>
+</div>

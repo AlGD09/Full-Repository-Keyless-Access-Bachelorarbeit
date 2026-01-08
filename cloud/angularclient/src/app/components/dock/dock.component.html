@@ -1,0 +1,22 @@
+<div class="flex justify-center mt-16">
+  <div
+    class="flex gap-6 px-6 py-3 bg-[#FFFFFF] rounded-2xl border border-neutral-700 shadow-sm backdrop-blur-md w-[400px] justify-center"
+  >
+    <div
+      *ngFor="let item of dockItems"
+      (mouseenter)="hovered = item.label"
+      (mouseleave)="hovered = null"
+      (click)="handleClick(item)"
+      class="relative flex items-center justify-center w-12 h-12 rounded-full border border-neutral-700 bg-[#FFFFFF] text-black cursor-pointer transition-all duration-300 hover:scale-125 hover:bg-neutral-800"
+    >
+      <i [class]="item.icon" class="text-xl"></i>
+      <!-- Tooltip -->
+      <div
+        *ngIf="hovered === item.label"
+        class="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-[#060010] text-white text-xs px-2 py-1 rounded-md border border-neutral-700 whitespace-nowrap"
+      >
+        {{ item.label }}
+      </div>
+    </div>
+  </div>
+</div>

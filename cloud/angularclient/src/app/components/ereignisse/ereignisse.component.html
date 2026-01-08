@@ -1,0 +1,128 @@
+<div class="min-h-screen w-full bg-white text-gray-900 flex flex-col p-0 m-0">
+
+  <!-- Überschrift -->
+  <div class="px-20 pt-28 pb-6">
+    <h1 class="text-4xl font-extrabold text-[#002B49]">Systemereignisse</h1>
+    <p class="text-gray-600 leading-relaxed">
+      <br />
+      Diese Sektion stellt eine Übersicht der Maschinenereignisse bereit. Dazu werden Anomalien erkannt und gemeldet.
+      <br />
+    </p>
+  </div>
+
+  <div class="flex flex-row gap-8 px-20 mt-8">
+    <div class="bg-white rounded-2xl w-[50%]">
+      <h2 class="text-xl font-semibold text-[#002B49] mb-8">
+        Ereignisse-Übersicht
+      </h2>
+      <!-- SVG-Container -->
+      <div class="w-full flex justify-center items-center mb-4 border border-[#f7f7f7] rounded-xl">
+        <svg class="event-graph w-full" style=""></svg>
+      </div>
+    </div>
+
+    <div class="w-[50%] mb-4">
+      <h2 class="text-xl font-semibold text-[#002B49]">
+        Anomalien
+      </h2>
+      <!-- Button oben rechts nur wenn mehr als eine Anomalie -->
+      <div class="flex justify-end mb-2 h-6">
+        <button
+          *ngIf="anomalies && anomalies.length > 1; else emptyButton"
+          (click)="deleteAllAnomalies()"
+          class="text-red-700 hover:text-red-900 transition"
+          title="Alle Anomalien Löschen"
+        >
+          Alle löschen
+        </button>
+      </div>
+
+      <!-- Unsichtbarer Platzhalter -->
+      <ng-template #emptyButton>
+        <button class="opacity-0 pointer-events-none">
+          Platzhalter
+        </button>
+      </ng-template>
+      <div
+        *ngIf="anomalies?.length; else noAnomalies"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"
+      >
+        <div
+          *ngFor="let a of anomalies"
+          class="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 p-6 flex flex-col items-center text-center"
+          (click)="handleClick(a)"
+          [ngClass]="{ 'opacity-40 grayscale': a.status === false }"
+        >
+          <!-- Symbol oben -->
+          <div class="bg-white shadow-sm rounded-lg p-14 mb-3 text-center">
+            <i class="fas fa-exclamation text-6xl text-red-500"></i>
+          </div>
+
+          <!-- Maschine -->
+          <div class="flex items-center mb-4">
+            <!-- Linke Spalte -->
+            <div class="w-28 px-2 flex justify-left items-center text-base font-semibold text-[#002B49]">
+              Maschine
+            </div>
+
+            <!-- Rechte Spalte -->
+            <div>
+              <h3 class="text-sm font-semibold text-gray-700 leading-tight">
+                {{ a.name || 'Unbenannte Maschine' }}
+              </h3>
+              <p class="text-xs text-gray-500 truncate w-20">
+                ID: {{ a.rcuId }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Smartphone -->
+          <div class="flex items-center mb-3">
+            <!-- Linke Spalte -->
+            <div class="w-28 flex justify-left items-center text-base font-semibold text-[#002B49]">
+              Smartphone
+            </div>
+
+            <!-- Rechte Spalte -->
+            <div>
+              <h3 class="text-sm font-semibold text-gray-700 leading-tight truncate w-24">
+                {{ a.deviceName || 'Unbekanntes Smartphone' }}
+              </h3>
+              <p class="text-xs text-gray-500 truncate w-20">
+                ID: {{ a.deviceId }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Feststellungszeitpunkt -->
+          <div class="text-base font-semibold text-gray-700">
+            Feststellungszeitpunkt
+          </div>
+
+          <div class="mb-2 font-medium text-sm text-gray-500">
+            {{ a.eventTime ? (a.eventTime | date:'dd.MM.yyyy - HH:mm') : '—' }}
+          </div>
+
+
+          <!-- Löschen-Button unten -->
+          <button
+            (click)="deleteAnomaly(a.id!); $event.stopPropagation()"
+            class="mt-auto text-red-700 hover:text-red-700 transition"
+            title="Löschen"
+          >
+            <i class="fas fa-trash"></i>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Keine Anomalien -->
+      <ng-template #noAnomalies>
+        <div class="flex text-gray-500 italic justify-center items-center text-sm text-center">
+          Keine Anomalien festgestellt
+        </div>
+      </ng-template>
+
+    </div>
+  </div>
+</div>

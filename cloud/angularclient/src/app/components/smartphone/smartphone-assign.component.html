@@ -1,0 +1,80 @@
+<div class="min-h-screen w-full bg-white text-gray-900 flex flex-col p-0 m-0">
+  <!-- Überschrift -->
+  <div class="px-20 pt-28 pb-6">
+    <h1 class="text-4xl font-extrabold text-[#002B49]">Benutzer zuweisen</h1>
+  </div>
+
+  <div class="flex flex-col w-full bg-white flex-1 px-20 py-10 pt-20">
+    <div class="grid grid-cols-[1fr_1fr_1.5fr] gap-8 items-start mb-16 max-w-6xl w-full">
+      <!-- Linke Spalte  -->
+      <div>
+        <h2 class="text-2xl font-semibold text-gray-900 mb-2">
+          Ausgewähltes Smartphone
+        </h2>
+
+        <div class="flex items-center gap-6 z-20 pt-8" *ngIf="smartphoneName">
+          <img
+            [src]="getSmartphoneImage(smartphoneName).src"
+            [ngClass]="getSmartphoneImage(smartphoneName).height"
+            alt="Smartphonesymbol"
+            class="h-19 object-contain px-3 pt-2"
+          />
+          <p class="text-gray-700 font-semibold text-lg font-medium pt-4">
+            {{ smartphoneName }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Mittlere Spalte: Pfeile -->
+      <div class="flex justify-center px-5 pt-20">
+        <span class="text-[8rem] font-extrabold text-[#002B49]">≪</span>
+      </div>
+
+      <!-- Letzte Spalte -->
+      <div class="justify-left">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-2">
+          Benutzer zuweisen
+        </h2>
+
+        <div
+          class="max-h-[420px] overflow-y-auto pt-9 pl-1 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 rounded-lg"
+        >
+          <div
+            *ngFor="let u of users; trackBy: trackByUserId"
+            (click)="toggleSelection(u.id!)"
+            class="cursor-pointer border border-gray-200 rounded-xl h-9 max-w-[99%] shadow-sm transition transform hover:scale-[1.02] hover:shadow-md hover:bg-[#5e7f94] select-none"
+            [ngClass]="{'bg-gray-200 border-blue-400': selectedUserIds.includes(u.id!)}"
+          >
+            <div class="flex flex-col">
+              <span class="text-gray-900 px-3 pt-1 font-medium text-lg">
+                {{ u.username }}
+                <span class="text-gray-500 text-sm"> -  {{ u.email }}</span>
+              </span>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <!-- Zuweisungs-Button -->
+          <button
+            (click)="assign()"
+            class="mt-8 bg-[#002B49] hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow transition"
+          >
+            Zuweisen
+          </button>
+        </div>
+
+        <!-- Message -->
+        <div
+          *ngIf="getAssigned"
+          class="mt-8 bg-gradient-to-r from-[#FCFCFC] to-white border-l-4 border-blue-800 p-4 rounded text-[15px] text-gray-700"
+        >
+          <span class="font-light">Benutzer erfolgreich zugewiesen!</span>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+  </div>

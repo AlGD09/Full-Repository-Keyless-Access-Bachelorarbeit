@@ -1,0 +1,616 @@
+package com.keyless.rexroth.service;
+
+import com.keyless.rexroth.entity.*;
+import com.keyless.rexroth.repository.RCURepository;
+import com.keyless.rexroth.repository.SmartphoneRepository;
+import com.keyless.rexroth.repository.EventRepository;
+import com.keyless.rexroth.repository.AnomalyRepository;
+import com.keyless.rexroth.repository.ProgrammedRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.context.request.async.DeferredResult;
+import reactor.core.publisher.Sinks;
+import reactor.core.publisher.Flux;
+
+@Service
+
+public class RCUService {
+
+    @Autowired
+    private RCURepository rcuRepository;
+
+    @Autowired
+    private SmartphoneRepository smartphoneRepository;
+
+    @Autowired
+    private EventRepository eventRepository;
+
+    @Autowired
+    private AnomalyRepository anomalyRepository;
+
+    @Autowired
+    private ProgrammedRepository programmedRepository;
+
+    private static final long TIMEOUT_MILLIS = 5_000L;  // Timeout zum Antworten auf App Verriegelungsbefehl
+
+    // Jede RCU (jede Maschine) erhält ihren eigenen SSE-Stream
+    private final Map<String, Sinks.Many<String>> activeSinkMap = new ConcurrentHashMap<>();
+
+    // Erkennen ob SSE-Verbindung ausserordentlich unterbrochen wurde}
+    private final Map<String, AtomicBoolean> exitFlagMap = new ConcurrentHashMap<>();
+
+    private final ConcurrentMap<String, DeferredResult<ResponseEntity<Map<String, Object>>>> operationResults = new ConcurrentHashMap<>();
+
+    // Aktive Status Kontrolle aller registrierten RCUs
+    private final ConcurrentMap<String, LocalDateTime> lastStatusPoll = new ConcurrentHashMap<>();
+
+    public RCU registerRcu(String rcuId, String name, String location) {
+        if (rcuRepository.findByRcuId(rcuId) != null) {
+            return null; // existiert bereits
+        }
+        RCU rcu = new RCU();
+        rcu.setRcuId(rcuId);
+        rcu.setName(name);
+        rcu.setLocation(location);
+        rcu.setStatus("offline");
+        return rcuRepository.save(rcu);
+    }
+
+    public List<RCU> getAllRcus() {
+        return rcuRepository.findAll();
+    }
+
+    public RCU assignSmartphones(Long rcuId, List<Long> smartphoneIds) {
+        RCU rcu = rcuRepository.findById(rcuId).orElse(null);
+        if (rcu == null) return null;
+
+        for (Long smartphoneId : smartphoneIds) {
+            Smartphone smartphone = smartphoneRepository.findById(smartphoneId).orElse(null);
+            if (smartphone != null && !rcu.getAllowedSmartphones().contains(smartphone)) {
+                rcu.addSmartphone(smartphone);
+            }
+        }
+        return rcuRepository.save(rcu);
+    }
+
+    public RCU getRcuByRcuId(String rcuId) {
+        return rcuRepository.findByRcuId(rcuId);
+    }
+
+    public void deleteRcu(Long id) {
+        if (rcuRepository.existsById(id)) {
+            RCU rcu = rcuRepository.findById(id).orElse(null);
+            if (rcu != null) {
+                lastStatusPoll.remove(rcu.getRcuId());
+                if (rcu.getStatus().equals("Remote - idle") || rcu.getStatus().equals("Remote - operational")) {
+                    sendRemoteExitEvent(rcu.getRcuId());
+                    addNewEvent(rcu.getRcuId(), "Remote Control", "1", "Fernsteuerung deaktiviert");
+                } else if (rcu.getStatus().equals("operational")) {
+                    sendLockEvent(rcu.getRcuId());
+                    addNewEvent(rcu.getRcuId(), "Remote Control", "1", "Remote Verriegelt");
+                }
+                rcuRepository.deleteById(id);
+            }
+
+
+        }
+
+    }
+
+    public List<Event> getAllEvents() { return eventRepository.findAll(); }
+
+    public List<Event> getGraphEvents() { return eventRepository.findTop20ByOrderByEventTimeDesc(); }
+
+    public List<Event> getRcuEvents(String rcuId) {
+        return eventRepository.findTop10ByRcuIdOrderByEventTimeDesc(rcuId);
+    }
+
+    public void addNewEvent(String rcuId, String deviceName, String deviceId, String result) {
+        RCU rcu = rcuRepository.findByRcuId(rcuId);
+        Event lastEvent = eventRepository.findTop1ByRcuIdOrderByEventTimeDesc(rcuId);
+
+        if (rcu == null) {
+            return;
+        }
+
+        // Ungwöhnliche Verriegelung bei App lost Cloud Verbindung + neue Maschine Session danach erkennen
+        if (lastEvent != null
+                && result.equals("Zugang autorisiert")
+                && lastEvent.getResult().equals("Entriegelt")) {
+            Event event = new Event();
+            event.setName(rcu.getName());
+            event.setRcuId(rcuId);
+            event.setDeviceName(lastEvent.getDeviceName());
+            event.setDeviceId(lastEvent.getDeviceId());
+            event.setResult("Ungewöhnliche Verriegelung");
+            event.setEventTime(java.time.LocalDateTime.now());
+            eventRepository.save(event);
+
+            rcu.setStatus("idle");
+            rcuRepository.save(rcu);
+        }
+        Event event = new Event();
+        event.setName(rcu.getName());
+        event.setRcuId(rcuId);
+        event.setDeviceName(deviceName);
+        event.setDeviceId(deviceId);
+        event.setResult(result);
+        event.setEventTime(java.time.LocalDateTime.now());
+        if (result.equals("Entriegelt")) {
+            rcu.setStatus("operational");
+            rcuRepository.save(rcu);
+        }
+        if (result.equals("Verriegelt")) {
+            rcu.setStatus("idle");
+            confirmLock(rcuId);  // DeferredResult -> accepted
+            rcuRepository.save(rcu);
+        } else if (result.equals("Ungewöhnliche Verriegelung")) {
+            rcu.setStatus("idle");
+            rcuRepository.save(rcu);
+        }
+
+        if (result.equals("Remote Verriegelt")) {
+            rcu.setStatus("Remote - idle");
+            confirmLock(rcuId);  // DeferredResult -> accepted
+            rcuRepository.save(rcu);
+        } else if (result.equals("Remote Entriegelt")) {
+            confirmLock(rcuId);
+            rcu.setStatus("Remote - operational");
+            rcuRepository.save(rcu);
+        }
+
+        if (result.equals("Fernsteuerung aktiviert")) {
+            rcu.setStatus("Remote - idle");
+            rcuRepository.save(rcu);
+        }
+
+        if (result.equals("Fernsteuerung deaktiviert")) {
+            rcu.setStatus("idle");
+            lastStatusPoll.put(rcuId, LocalDateTime.now());  // Kurzer offline nach exit verhindern
+            rcuRepository.save(rcu);
+            confirmLock(rcuId);
+        }
+
+        if (lastEvent != null) {
+            if (result.equals("Verriegelt") && lastEvent.getResult().equals("Notfallverriegelung")) {
+                // Doppelte Verriegelung im Event-Übersicht verhindern
+            } else if (result.equals("Remote Verriegelt") && lastEvent.getResult().equals("Programmierte Verr.")) {
+                // Doppelte Verriegelung im Event-Übersicht verhindern
+            } else if (result.equals("Remote Entriegelt") && lastEvent.getResult().equals("Programmierte Entr.")) {
+                // Doppelte Entriegelung im Event-Übersicht verhindern
+            } else {
+                eventRepository.save(event);
+            }
+        } else {
+            eventRepository.save(event);
+        }
+
+
+
+        // Alle Events dieser RCU holen – sortiert
+        List<Event> events = eventRepository.findByRcuIdOrderByEventTimeAsc(rcuId);
+
+        // Wenn mehr als 10 vorhanden -> älteste löschen
+        while (events.size() > 10) {
+            Event oldest = events.get(0);   // erstes Element = ältestes
+            eventRepository.delete(oldest);
+            events.remove(0);
+        }
+        Anomaly anomaly = detectAnomalyForRcu(rcuId, deviceName, deviceId, event);
+        if (anomaly != null) {
+            anomalyRepository.save(anomaly);
+        }
+
+    }
+
+    public Anomaly detectAnomalyForRcu(String rcuId, String deviceName, String deviceId, Event event) {
+
+        List<Event> events = eventRepository.findTop10ByRcuIdAndDeviceIdOrderByEventTimeDesc(rcuId, deviceId);
+
+        if (events.size() < 2) return null;
+
+        // Event lastEvent = events.get(events.size() - 1);
+        Event penultimateEvent = events.get(1);
+
+        // String lastResult = lastEvent.getResult();
+        String penultimateResult = penultimateEvent.getResult();
+
+
+        String result = event.getResult();
+        // Fail fAil = failRepository.findByRcuIdAndDeviceName(rcuId, device);
+
+        if (result.equals("Zugang verweigert") && penultimateResult.equals("Zugang verweigert")) {
+
+            if (!anomalyRepository.existsByRcuIdAndDeviceIdAndEventTime(rcuId, deviceId, event.getEventTime())) {
+                return createAnomaly(rcuId, deviceName, deviceId, event.getEventTime());
+            }
+
+        }
+
+        return null;
+    }
+
+    private Anomaly createAnomaly(String rcuId, String deviceName, String deviceId, LocalDateTime ts) {
+        RCU rcu = rcuRepository.findByRcuId(rcuId);
+        Anomaly anomaly = new Anomaly();
+        anomaly.setName(rcu.getName());
+        anomaly.setDeviceName(deviceName);
+        anomaly.setDeviceId(deviceId);
+        anomaly.setStatus(true);
+        anomaly.setRcuId(rcuId);
+        anomaly.setEventTime(ts);
+        return anomaly;
+    }
+
+
+    public List<Anomaly> detectAllAnomalies() {
+        return anomalyRepository.findAllByOrderByEventTimeDesc();
+    }
+
+    public void deleteAnomaly(Long id) {
+        if (anomalyRepository.existsById(id)) {
+            anomalyRepository.deleteById(id);
+        }
+    }
+
+    public void deleteAllAnomalies() {
+        anomalyRepository.deleteAll();
+    }
+
+
+    // Verriegelungsmethoden
+
+    public Flux<String> streamEvents(String rcuId) {
+        if (activeSinkMap.get(rcuId) != null) {
+            activeSinkMap.remove(rcuId);
+        }
+
+        /*if (exitFlagMap.get(rcuId) != null) {
+            exitFlagMap.remove(rcuId);
+        }*/
+
+        Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
+        activeSinkMap.put(rcuId, sink);
+        // exitFlagMap.put(rcuId, false);
+        AtomicBoolean exitSent = new AtomicBoolean(false);
+        exitFlagMap.put(rcuId, exitSent);
+
+        Flux<String> heartbeat = Flux.interval(Duration.ofSeconds(10))
+                .map(t -> "HEARTBEAT");
+
+        // Evento inicial READY pero con DELAY de 100–200 ms
+        Flux<String> readyEvent = Flux.just("READY")
+                .delayElements(Duration.ofMillis(400));
+
+        return Flux.merge(
+                        readyEvent,
+                        sink.asFlux(),
+                        heartbeat
+                )
+                .map(event -> "data:" + event + "\n\n")
+                .doOnCancel(() -> {
+                    // boolean exitSent = exitFlagMap.getOrDefault(rcuId, false);
+
+                    if (!exitSent.get()) {
+                        Event event = eventRepository.findTop1ByRcuIdOrderByEventTimeDesc(rcuId);
+                        RCU rcu = rcuRepository.findByRcuId(rcuId);
+                        if (rcu != null && (rcu.getStatus().equals("Remote - operational") || rcu.getStatus().equals("Remote - idle"))) {
+                            if (event.getResult().equals("Remote Entriegelt")) {
+                                addNewEvent(rcuId, "Remote Control", "1", "Ungewöhnliche Verriegelung");
+                            }
+                            if (!event.getResult().equals("Notfallverriegelung")) {  // Rare Case verhindern Notfallverhinderung + Connection Lost gleichzeitig
+                                addNewEvent(rcuId, "Remote Control", "1", "Fernsteuerung deaktiviert");
+                            }
+                        }
+                        if (rcu != null) {
+                            rcu.setStatus("offline");
+                            rcuRepository.save(rcu);
+                        }
+
+                    }
+                    deleteScheduleRemote(rcuId);  // Alle programmed remote Befehle entfernen -> SSE soll offen bleiben
+                    // Löschen, aber nur, wenn der Map-Eintrag wirklich zu *dieser* Verbindung gehört
+                    exitFlagMap.compute(rcuId, (id, flagInMap) ->
+                            flagInMap == exitSent ? null : flagInMap
+                    );
+                });
+    }
+
+    // Wird aufgerufen, wenn von der App aus LOCK ausgeführt werden soll
+    public void sendLockEvent(String rcuId) {
+        Sinks.Many<String> sink = activeSinkMap.get(rcuId);
+        AtomicBoolean exitSent = exitFlagMap.get(rcuId);
+        if (exitSent != null) {
+            exitSent.set(true);
+        }
+        if (sink != null) {
+            sink.tryEmitNext("LOCK");
+        }
+
+        activeSinkMap.remove(rcuId);
+    }
+
+    public DeferredResult<ResponseEntity<Map<String, Object>>> createOperation(String rcuId, String deviceName, String deviceId) {
+        DeferredResult<ResponseEntity<Map<String, Object>>> deferredResult = new DeferredResult<>(TIMEOUT_MILLIS);
+
+        Event event = eventRepository.findTop1ByRcuIdOrderByEventTimeDesc(rcuId);
+
+        // Verhindern altes Smartphone nach Cloud Verlust neue Aktivitäten zu stoppen
+        if (!event.getDeviceId().equals(deviceId)) {
+            Map<String, Object> body = Map.of(
+                    "rcuId", rcuId,
+                    "status", "deprecated"
+            );
+            deferredResult.setResult(ResponseEntity.accepted().body(body));
+            return deferredResult;
+        }
+
+        operationResults.put(rcuId, deferredResult);
+
+        deferredResult.onTimeout(() -> {
+            Map<String, Object> body = Map.of(
+                    "rcuId", rcuId,
+                    "status", "timeout"
+            );
+            deferredResult.setResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(body));
+            operationResults.remove(rcuId);
+            if (!event.getResult().equals("Zugang verweigert")) {
+                addNewEvent(rcuId, deviceName, deviceId, "Ungewöhnliche Verriegelung");
+            }
+            RCU rcu = rcuRepository.findByRcuId(rcuId);
+            if (rcu != null && !event.getResult().equals("Zugang verweigert")) {
+                rcu.setStatus("offline");
+                rcuRepository.save(rcu);
+            }
+        });
+
+
+
+        deferredResult.onCompletion(() -> operationResults.remove(rcuId));
+
+        return deferredResult;
+    }
+
+    public void confirmLock(String rcuId) {
+        DeferredResult<ResponseEntity<Map<String, Object>>> deferredResult = operationResults.get(rcuId);
+        if (deferredResult == null) {
+            return;
+        }
+
+        Map<String, Object> body = Map.of(
+                "rcuId", rcuId,
+                "status", "accepted"
+        );
+
+        deferredResult.setResult(ResponseEntity.accepted().body(body));
+    }
+
+    // Remote Control Methoden
+
+    public void setRcuStatus(String rcuId, String status) {
+        RCU rcu = rcuRepository.findByRcuId(rcuId);
+
+        rcu.setStatus(status);
+        rcuRepository.save(rcu);
+    }
+
+
+    public String getRcuStatus(String rcuId) {
+        RCU rcu = rcuRepository.findByRcuId(rcuId);
+        if (rcu == null) {
+            return "Not-Registered Machine";
+        }
+        if (!rcu.getStatus().equals("remote mode requested")) {
+            rcu.setStatus("idle");
+            rcuRepository.save(rcu);
+        }
+        lastStatusPoll.put(rcuId, LocalDateTime.now());
+        return rcu.getStatus();
+    }
+
+    @Scheduled(fixedDelay = 10_000)
+    public void markInactiveRcusOffline() {
+        LocalDateTime now = LocalDateTime.now();
+        lastStatusPoll.forEach((rcuId, lastPoll) -> {
+            if (Duration.between(lastPoll, now).getSeconds() > 30) {
+                RCU rcu = rcuRepository.findByRcuId(rcuId);
+                if (rcu != null && ("idle".equals(rcu.getStatus()) || "remote mode requested".equals(rcu.getStatus()))) {
+                    rcu.setStatus("offline");
+                    rcuRepository.save(rcu);
+                }
+            }
+        });
+    }
+
+    public DeferredResult<ResponseEntity<Map<String, Object>>> remoteLock(String rcuId) {
+        DeferredResult<ResponseEntity<Map<String, Object>>> deferredResult = new DeferredResult<>(TIMEOUT_MILLIS);
+
+        Event event = eventRepository.findTop1ByRcuIdOrderByEventTimeDesc(rcuId);  // Get Last Event
+
+        operationResults.put(rcuId, deferredResult);
+
+        deferredResult.onTimeout(() -> {
+            Map<String, Object> body = Map.of(
+                    "rcuId", rcuId,
+                    "status", "timeout"
+            );
+            deferredResult.setResult(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(body));
+            operationResults.remove(rcuId);
+            if (event.getResult().equals("Remote Entriegelt")) {
+                addNewEvent(rcuId, "Remote Control", "1", "Ungewöhnliche Verriegelung");
+            }
+            if (!event.getResult().equals("Notfallverriegelung")) {
+                addNewEvent(rcuId, "Remote Control", "1", "Fernsteuerung deaktiviert");
+            }
+            RCU rcu = rcuRepository.findByRcuId(rcuId);
+            if (rcu != null) {
+                rcu.setStatus("offline");
+                rcuRepository.save(rcu);
+            }
+        });
+
+        deferredResult.onCompletion(() -> operationResults.remove(rcuId));
+
+        return deferredResult;
+    }
+
+    public void sendRemoteLockEvent(String rcuId) {
+        Sinks.Many<String> sink = activeSinkMap.get(rcuId);
+        if (sink != null) {
+            sink.tryEmitNext("LOCK");
+        }
+    }
+
+    public void sendNotfallLockEvent(String rcuId) {
+        Sinks.Many<String> sink = activeSinkMap.get(rcuId);
+        AtomicBoolean exitSent = exitFlagMap.get(rcuId);
+        if (exitSent != null) {
+            exitSent.set(true);
+        }
+        // addNewEvent(rcuId, "Remote Control", "1", "Notfallverriegelung");
+        if (sink != null) {
+            sink.tryEmitNext("LOCK");
+        }
+    }
+
+
+    public void sendRemoteUnlockEvent(String rcuId) {
+        Sinks.Many<String> sink = activeSinkMap.get(rcuId);
+        if (sink != null) {
+            sink.tryEmitNext("UNLOCK");
+        }
+    }
+
+    public void sendRemoteExitEvent(String rcuId) {
+        Sinks.Many<String> sink = activeSinkMap.get(rcuId);
+        AtomicBoolean exitSent = exitFlagMap.get(rcuId);
+        if (exitSent != null) {
+            exitSent.set(true);
+        }
+        if (sink != null) {
+            sink.tryEmitNext("EXIT");
+        }
+
+        activeSinkMap.remove(rcuId);
+    }
+
+    // Scheduled Remote Control
+    public Programmed registerScheduled(String rcuId, LocalDateTime unlockTime, LocalDateTime lockTime) {
+        if (rcuId == null) return null;
+
+        // Prüfen, ob bereits existiert -> ggf. Zeiten aktualisieren
+        Programmed existing = programmedRepository.findByRcuId(rcuId);
+        if (existing != null) {
+            existing.setUnlockTime(unlockTime);
+            existing.setLockTime(lockTime);
+            return programmedRepository.save(existing);
+        }
+
+        Programmed p = new Programmed();
+        p.setRcuId(rcuId);
+        p.setUnlockTime(unlockTime);
+        p.setLockTime(lockTime);
+        // s.setLastSeen(java.time.LocalDateTime.now());
+        return programmedRepository.save(p);
+    }
+
+    @Scheduled(fixedDelay = 10_000)
+    public void executeProgrammed() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Programmed> all = programmedRepository.findAll();
+        for (Programmed programmed : all) {
+            String rcuId = programmed.getRcuId();
+            LocalDateTime unlock = programmed.getUnlockTime();
+            LocalDateTime lock = programmed.getLockTime();
+
+            // Sicherheitsprüfung - nur im Remote-Modus ausführen (aktive SSE Verbindung)
+            RCU rcu = rcuRepository.findByRcuId(rcuId);
+            if (rcu == null) continue;
+            String status = rcu.getStatus();
+
+            boolean remoteActive =
+                    status.equals("Remote - idle") ||
+                    status.equals("Remote - operational");
+
+            if (!remoteActive) {
+                // Keine Befehle senden, solange Remote nicht aktiv
+                continue;
+            }
+
+            // UNLOCK
+            if (unlock != null && !now.isBefore(unlock)) {
+                sendRemoteUnlockEvent(rcuId);
+                programmed.setUnlockTime(null);
+                programmedRepository.save(programmed);
+                addNewEvent(rcuId, "Remote Control", "1", "Programmierte Entr.");
+            }
+
+            // LOCK
+            if (lock != null && !now.isBefore(lock)) {
+                sendRemoteLockEvent(rcuId);
+                programmed.setLockTime(null);
+                programmedRepository.save(programmed);
+                addNewEvent(rcuId, "Remote Control", "1", "Programmierte Verr.");
+            }
+
+            // Löschen, wenn beide ausgeführt wurden
+            if (programmed.getUnlockTime() == null && programmed.getLockTime() == null) {
+                programmedRepository.delete(programmed);
+            }
+        }
+
+    }
+
+    public void deleteScheduleRemote(String rcuId) {
+        List<Programmed> programmed = programmedRepository.findAllByRcuId(rcuId);
+        for (Programmed p : programmed) {
+            programmedRepository.delete(p);
+        }
+    }
+
+    public void deleteScheduleUnlock(String rcuId) {
+        List<Programmed> programmed = programmedRepository.findAllByRcuId(rcuId);
+        for (Programmed p : programmed) {
+            p.setUnlockTime(null);
+            programmedRepository.save(p);
+        }
+    }
+
+    public void deleteScheduleLock(String rcuId) {
+        List<Programmed> programmed = programmedRepository.findAllByRcuId(rcuId);
+        for (Programmed p : programmed) {
+            p.setLockTime(null);
+            programmedRepository.save(p);
+        }
+    }
+
+    public List<Programmed> getScheduledForRcu(String rcuId) {
+        RCU rcu = rcuRepository.findByRcuId(rcuId);
+        if (rcu == null) {
+            return Collections.emptyList(); // besser als null zurückgeben
+        }
+
+        List<Programmed> programmed = programmedRepository.findAllByRcuId(rcuId);
+        if (programmed.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return programmed;
+    }
+
+
+
+}

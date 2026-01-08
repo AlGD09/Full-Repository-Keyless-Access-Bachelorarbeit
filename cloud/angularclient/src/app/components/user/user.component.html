@@ -1,0 +1,161 @@
+<!-- Vollflächiger Bereich -->
+<div class="min-h-screen w-full bg-white text-gray-900 flex flex-col p-0 m-0">
+  <!-- Überschrift -->
+  <div class="px-20 pt-28 pb-6">
+    <h1 class="text-4xl font-extrabold text-[#002B49]">Benutzerregistrierung</h1>
+  </div>
+
+
+  <!-- Formularbereich -->
+  <div class="flex flex-col w-full bg-white flex-1 px-20 py-10 pt-20">
+
+    <!-- Neuer Benutzer -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start mb-16 max-w-6xl w-full">
+      <!-- Linke Spalte (Titel + Beschreibung) -->
+      <div>
+        <h2 class="text-2xl font-semibold text-gray-900 mb-2">Neuen Benutzer registrieren</h2>
+        <p class="text-gray-500 text-sm">
+          Die Eingabe einer E-Mail-Adresse ist optional.
+        </p>
+        <p class="text-gray-500 text-sm">
+          Jeder Benutzername darf nur einmal verwendet werden.
+        </p>
+      </div>
+
+      <!-- Rechte Spalte (Formularfelder) -->
+      <form (ngSubmit)="register()" class="md:col-span-2 flex flex-col space-y-6">
+        <!-- Benutzername -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Benutzername</label>
+          <input
+            [(ngModel)]="UserName"
+            name="UserName"
+            required
+            placeholder="Name"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- E-Mail -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">E-Mail-Adresse</label>
+          <input
+            [(ngModel)]="Email"
+            name="Email"
+            placeholder="name@boschrexroth.de"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Secret Hash -->
+        <div class="relative">
+          <label class="block text-sm font-semibold text-gray-700 mb-1">
+            Secret Hash
+          </label>
+
+          <input
+            #hashInput
+            [(ngModel)]="SecretHash"
+            name="SecretHash"
+            required
+            placeholder="32-stelliger Hex-Hash"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+
+          <!-- Überlappender Button -->
+          <button
+            type="button"
+            (click)="fillRandomHash(hashInput)"
+            class="absolute top-8 right-5 z-10 pt-1 text-[#002B49] hover:text-blue-700 font-medium text-sm"
+            title="Zufälligen Hash einfügen"
+          >
+            Hash erzeugen
+          </button>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex justify-end mt-4">
+          <button
+            type="submit"
+            class="bg-[#002B49] hover:bg-blue-700 text-white font-semibold w-48 h-10  rounded-lg shadow transition"
+          >
+            Benutzer registrieren
+          </button>
+        </div>
+
+        <div
+          *ngIf="registered"
+          class="mt-8 bg-gradient-to-r from-[#FCFCFC] to-white border-l-4 border-blue-800 p-4 rounded text-[15px] text-gray-700"
+        >
+          <span class="font-light">Benutzer erfolgreich registriert!</span>
+        </div>
+
+        <div
+          *ngIf="err_registered"
+          class="mt-8 bg-gradient-to-r from-[#FCFCFC] to-white border-l-4 border-red-800 p-4 rounded text-[15px] text-gray-700"
+        >
+          <span class="font-semibold">Fehler:</span>
+          <span class="font-light"> Benutzername bereits vergeben</span>
+        </div>
+      </form>
+    </div>
+
+    <!-- Trennung -->
+    <hr class="border-gray-200 my-12" />
+
+    <!-- Hash abrufen -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start max-w-6xl w-full">
+      <!-- Linke Spalte -->
+      <div>
+        <h2 class="text-2xl font-semibold text-gray-900 mb-2">Hash abrufen</h2>
+        <p class="text-gray-500 text-sm">
+          Wählen Sie einen Benutzer aus, um seinen gespeicherten Secret Hash anzuzeigen.
+        </p>
+      </div>
+
+      <!-- Rechte Spalte -->
+      <form (ngSubmit)="requestHash()" class="md:col-span-2 flex flex-col space-y-6">
+
+        <!-- Benutzer auswählen -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Benutzer auswählen
+          </label>
+          <div class="relative">
+            <select [(ngModel)]="selectedUser" name="selectedUser"
+                    class="w-full appearance-none bg-white text-gray-400 rounded-xl border border-gray-300 px-4 py-2 pr-10 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+              <option [ngValue]="null" class="text-gray-300">-- auswählen --</option>
+              <option *ngFor="let u of users" [ngValue]="u"
+                class="text-gray-700">
+                {{ u.username }}
+              </option>
+            </select>
+            <!-- Pfeil-Icon -->
+            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-4">
+          <button
+            type="submit"
+            class="bg-[#002B49] hover:bg-blue-700 text-white font-semibold w-48 h-10  rounded-lg shadow transition"
+          >
+            Hash abrufen
+          </button>
+        </div>
+
+        <!-- Hash Ergebnis -->
+        <div
+          *ngIf="getHash"
+          class="mt-8 bg-gradient-to-r from-[#FCFCFC] to-white border-l-4 border-blue-800 p-4 rounded text-[15px] text-gray-700"
+        >
+          <span class="font-semibold">Secret Hash:</span>
+          <span class="font-light"> {{ lastHash }}</span>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

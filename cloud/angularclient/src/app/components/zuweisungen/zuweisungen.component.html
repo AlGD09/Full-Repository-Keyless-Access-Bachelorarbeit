@@ -1,0 +1,161 @@
+<!-- src/app/zuweisungen/zuweisungen.component.html -->
+<div class="min-h-screen w-full bg-white text-gray-900 flex flex-col p-0 m-0">
+
+  <!-- Überschrift -->
+  <div class="px-20 pt-28 pb-6">
+    <h1 class="text-4xl font-extrabold text-[#002B49]">Zuweisungen</h1>
+    <p class="text-gray-600 leading-relaxed">
+      <br />
+      Diese Sektion enthält eine detaillierte Übersicht über die Zuweisungen der einzelnen Maschinen und Smartphones.
+      <br />
+    </p>
+  </div>
+
+  <!-- Graph -->
+  <div class="flex flex-row gap-8 px-20 mt-8">
+    <div class="bg-white rounded-2xl w-[50%]">
+      <h2 class="text-xl font-semibold text-[#002B49] mb-8">
+        Systemübersicht
+      </h2>
+      <div class="mb-4">
+        <app-cascade-graph></app-cascade-graph>
+      </div>
+    </div>
+
+    <!-- Tabelle 1 -->
+    <div class="flex flex-col w-[50%]">
+      <h2 class="text-xl font-semibold text-[#002B49] mb-4">
+        Zuweisungskontrolle
+      </h2>
+      <p class="text-[18px] font-semibold mb-2 text-left">
+        <span class="text-[#3b82f6]">Maschinen</span>
+        <span class="text-gray-500"> ⟷ </span>
+        <span class="text-[#10b981]">Smartphones</span>
+      </p>
+      <div class="overflow-auto max-h-[35%]">
+        <table class="text-sm text-left border-gray-200">
+          <thead class="sticky top-0 bg-[#f7f7f7] font-semibold text-[#002B49] text-[14px] uppercase">
+          <tr>
+            <th class="px-4 py-2 first:rounded-tl-xl">Maschinenname</th>
+            <th class="px-4 py-2">RCU-ID</th>
+            <th class="px-4 py-2">Zugewiesene Smartphones</th>
+            <th class="px-4 py-2 last:rounded-tr-xl"></th>
+          </tr>
+          </thead>
+
+          <tbody class="divide-y divide-gray-100">
+          <tr
+            *ngFor="let a of assignments"
+            class="hover:bg-[#fcfcfc] transition text-gray-700 align-top"
+          >
+            <td class="px-4 py-2 align-middle hover:text-blue-900 border-r border-gray-100">{{ a.rcuName }}</td>
+            <td class="px-4 py-2 align-middle hover:text-blue-900 border-r border-gray-100">
+              {{ a.rcuId }}
+            </td>
+            <td class="px-4 py-2 hover:text-blue-900 align-middle border-r border-gray-100">
+              <ng-container *ngIf="a.smartphones.length; else none">
+                <ul class="list-inside space-y-1">
+                  <li *ngFor="let s of a.smartphones">
+                    <div class="flex justify-between items-center gap-2">
+                      <span class="truncate">
+                        {{ s.name }} - {{ s.deviceId }}
+                      </span>
+                      <button
+                        class="px-3 py-1 text-sm text-blue-600 hover:text-blue-900 transition shrink-0"
+                        (click)="removeSmartphone(a.rcuId!, s.id!)"
+                      >
+                        Unassign
+                      </button>
+                    </div>
+                  </li>
+                </ul>
+              </ng-container>
+
+              <ng-template #none>
+                <span class="text-gray-500 italic">Keine Smartphones zugewiesen</span>
+              </ng-template>
+            </td>
+
+            <td class="px-4 py-2 text-left align-middle">
+              <button
+                class="px-3 py-1 text-sm rounded-md bg-[#002B49] text-white hover:bg-blue-700 transition"
+                (click)="openAssignPage(a.rid!, a.rcuName!)">
+                Assign
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tabelle 2 -->
+      <p class="text-[18px] font-semibold mt-14 mb-2 text-left">
+        <span class="text-[#10b981]">Smartphones</span>
+        <span class="text-gray-500"> ⟷ </span>
+        <span class="text-[#f59e0b]">Benutzer</span>
+      </p>
+      <div class="overflow-auto max-h-[35%]">
+        <table class="text-sm text-left border-gray-200">
+          <thead class="sticky top-0 bg-[#f7f7f7] font-semibold text-[#002B49] text-[14px] uppercase">
+          <tr>
+            <th class="px-4 py-2 first:rounded-tl-xl">Smartphonename</th>
+            <th class="px-4 py-2">Smartphone-ID</th>
+            <th class="px-4 py-2">Zugewiesene Benutzer</th>
+            <th class="px-4 py-2 last:rounded-tr-xl"></th>
+          </tr>
+          </thead>
+
+          <tbody class="divide-y divide-gray-100">
+          <tr
+            *ngFor="let z of zuweisungen"
+            class="hover:bg-[#fcfcfc] transition text-gray-700 align-top"
+          >
+            <td class="px-4 py-2 align-middle hover:text-blue-900 border-r border-gray-100">{{ z.smartphoneName }}</td>
+            <td class="px-4 py-2 align-middle hover:text-blue-900 border-r border-gray-100">
+              {{ z.smartphoneId }}
+            </td>
+            <td class="px-4 py-2 hover:text-blue-900 align-middle border-r border-gray-100">
+
+              <ng-container *ngIf="z.users.length; else none">
+                <ul class="list-inside space-y-1">
+                  <li *ngFor="let u of z.users">
+                    <div class="flex justify-between items-center gap-2">
+                      <span class="truncate">
+                        {{ u.username }}
+                        <span
+                          class="text-gray-500 text-xs overflow-hidden text-ellipsis truncate max-w-[90px] inline-block align-middle"
+                          title="{{ u.email }}"
+                        >
+                          – {{ u.email }}
+                        </span>
+                      </span>
+                      <button
+                        class="px-2 py-1 text-sm text-blue-600 hover:text-blue-900 transition shrink-0"
+                        (click)="removeUser(z.smartphoneId!, u.id!)"
+                      >
+                        Unassign
+                      </button>
+                    </div>
+                  </li>
+                </ul>
+              </ng-container>
+
+              <ng-template #none>
+                <span class="text-gray-500 italic">Keine Users zugewiesen</span>
+              </ng-template>
+            </td>
+
+            <td class="px-4 py-2 text-left align-middle">
+              <button
+                class="px-3 py-1 text-sm rounded-md bg-[#002B49] text-white hover:bg-blue-700 transition"
+                (click)="openAssignSmartphone(z.sid!, z.smartphoneName!)">
+                Assign
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,101 @@
+package com.keyless.rexroth.entity;
+
+
+import jakarta.persistence.Entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+
+@Entity
+@Table(name = "smartphones")
+public class Smartphone {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true)
+    private String deviceId;
+
+    private String name;
+    //private String secretHash;
+    private String bleId;
+    private String status;
+    private LocalDateTime lastSeen;
+
+    @ManyToMany
+    @JoinTable(
+            name = "smartphone_users",
+            joinColumns = @JoinColumn(name = "smartphone_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> assignedUsers = new HashSet<>();
+
+    public Smartphone() {}
+
+    public Smartphone(String deviceId, String userName, String secretHash, String bleId, String status) {
+        this.deviceId = deviceId;
+        //this.userName = userName;
+        //this.secretHash = secretHash;
+        this.bleId = bleId;
+        this.status = status;
+        this.lastSeen = LocalDateTime.now();
+    }
+
+    // --- Getter & Setter ---
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getDeviceId() { return deviceId; }
+    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
+
+    public String getName() { return name; }
+    public void setName(String Name) { this.name = Name; }
+
+    //public String getSecretHash() { return secretHash; }
+    //public void setSecretHash(String secretHash) { this.secretHash = secretHash; }
+
+    public String getBleId() { return bleId; }
+    public void setBleId(String bleId) { this.bleId = bleId; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public LocalDateTime getLastSeen() { return lastSeen; }
+    public void setLastSeen(LocalDateTime lastSeen) { this.lastSeen = lastSeen; }
+
+    public Set<User> getAssignedUsers() {
+        return assignedUsers;
+    }
+
+    public void setAssignedUsers(Set<User> assignedUsers) {
+        this.assignedUsers = assignedUsers;
+    }
+
+    public void addUser(User user) {
+        this.assignedUsers.add(user);
+    }
+
+    public void removeUser(User user) {
+        this.assignedUsers.remove(user);
+    }
+
+    // --- wichtig für Set<Smartphone> in RCU ---
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Smartphone that = (Smartphone) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+
+
+}

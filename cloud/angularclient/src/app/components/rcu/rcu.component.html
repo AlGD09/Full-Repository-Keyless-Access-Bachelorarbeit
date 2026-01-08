@@ -1,0 +1,92 @@
+<div class="min-h-screen w-full bg-white text-gray-900 flex flex-col p-0 m-0">
+  <!-- Überschrift -->
+  <div class="px-20 pt-28 pb-6">
+    <h1 class="text-4xl font-extrabold text-[#002B49]">Maschinenregistrierung</h1>
+  </div>
+
+
+  <!-- Formularbereich -->
+  <div class="flex flex-col w-full bg-white flex-1 px-20 py-10 pt-20">
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start mb-16 max-w-6xl w-full">
+      <!-- Linke Spalte (Titel + Beschreibung) -->
+      <div>
+        <h2 class="text-2xl font-semibold text-gray-900 mb-2">Neue Maschine registrieren</h2>
+        <p class="text-gray-500 text-sm">
+          Die Eingabe des Standorts der Maschine ist optional.
+        </p>
+        <p class="text-gray-500 text-sm">
+          Maschinen können denselben Namen haben, die RCU-ID ist jedoch eindeutig.
+        </p>
+      </div>
+
+      <!-- Rechte Spalte (Formularfelder) -->
+      <form (ngSubmit)="register()" class="md:col-span-2 flex flex-col space-y-6">
+
+        <!-- Name -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+          <input
+            [(ngModel)]="name"
+            name="name"
+            placeholder="Bagger1"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- RCU-ID-->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">RCU-ID</label>
+          <input
+            [(ngModel)]="rcuId"
+            name="rcuId"
+            required
+            placeholder="6-stellige Maschinen-ID"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Ort -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Standort</label>
+          <input
+            [(ngModel)]="location"
+            name="location"
+            placeholder=""
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        <!-- Submit -->
+        <div class="flex justify-end mt-4">
+          <button
+            type="submit"
+            class="bg-[#002B49] hover:bg-blue-700 text-white font-semibold w-52 h-10  rounded-lg shadow transition"
+          >
+            Maschine registrieren
+          </button>
+        </div>
+
+
+        <div
+          *ngIf="registered"
+          class="mt-8 bg-gradient-to-r from-[#FCFCFC] to-white border-l-4 border-blue-600 p-4 rounded text-[15px] text-gray-700"
+        >
+          <span class="font-light">Maschine erfolgreich registriert! </span>
+        </div>
+
+        <div
+          *ngIf="exists"
+          class="mt-8 bg-gradient-to-r from-[#FCFCFC] to-white border-l-4 border-[#DA0000] p-4 rounded text-[15px] text-gray-700"
+        >
+          <span class="font-semibold">Fehler:</span>
+          <span class="font-light"> Maschine bereits registriert (wiederholte RCU-ID).</span>
+        </div>
+
+      </form>
+    </div>
+</div>
+
+
+
+

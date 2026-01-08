@@ -1,0 +1,149 @@
+<div
+  class="flex h-screen bg-gray-50 text-gray-800"
+>
+  <!-- Sidebar -->
+  <aside
+    class="group relative flex flex-col bg-white border-r border-gray-200 transition-all"
+    style="transition-duration: 0.3s;"
+    [style.width]="isExpanded ? '16rem' : '6rem'"
+    (mouseenter)="isExpanded = true"
+    (mouseleave)="isExpanded = false"
+  >
+    <div
+      class="flex items-center justify-center p-4 border-b border-gray-100 transition-all duration-300"
+      [ngClass]="{ 'flex-col': !isExpanded, 'gap-2': isExpanded }"
+    >
+      <img
+        src="keyless_cloud_logo.png"
+        alt="Keyless Icon"
+        [ngClass]="{
+        'w-12 h-12': !isExpanded,
+        'w-16 h-16 mr-2': isExpanded
+      }"
+        class="transition-all duration-300"
+      />
+      <div
+        class="flex flex-col leading-tight transition-all duration-300"
+        *ngIf="isExpanded"
+      >
+        <span class="text-xl font-bold text-[#002B49] text-left">Keyless</span>
+        <span class="text-xl font-bold text-[#002B49] text-right translate-x-2"
+        >Cloud</span
+        >
+      </div>
+    </div>
+
+    <nav class="flex-1 p-3 space-y-2 overflow-y-auto">
+      <!-- Home -->
+      <a
+        routerLink="/home"
+        routerLinkActive="bg-blue-50 text-blue-600"
+        class="flex items-center justify-between w-full px-3 py-2 rounded-lg hover:bg-blue-50 transition hover:no-underline"
+      >
+        <div class="flex items-center gap-3">
+          <i class="fas fa-home w-5 text-gray-500 mx-auto" [ngClass]="{ 'mx-0': isExpanded }"></i>
+          <span
+            *ngIf="isExpanded"
+            class="font-medium transition-opacity duration-300 whitespace-nowrap"
+          >Home</span
+          >
+        </div>
+      </a>
+
+      <!-- Registrierung -->
+      <div>
+        <button
+          (click)="toggleSection('registrierung')"
+          class="flex items-center justify-between w-full px-3 py-2 rounded-lg hover:bg-blue-50 transition"
+        >
+          <div class="flex items-center gap-3">
+            <i class="fas fa-user-plus w-5 text-gray-500 mx-auto" [ngClass]="{ 'mx-0': isExpanded }"></i>
+            <span
+              *ngIf="isExpanded"
+              class="font-medium whitespace-nowrap"
+            >Registrierung</span
+            >
+          </div>
+          <i
+            *ngIf="isExpanded"
+            class="fas fa-chevron-right text-sm transition-transform duration-300"
+            [class.rotate-90]="openSection === 'registrierung'"
+          ></i>
+        </button>
+
+        <!-- Untermenü -->
+        <div
+          *ngIf="isExpanded && openSection === 'registrierung'"
+          class="ml-8 mt-1 space-y-1"
+        >
+          <a routerLink="/user" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600 hover:no-underline"
+             routerLinkActive="text-blue-600 font-semibold">Benutzer</a>
+          <a routerLink="/smartphone" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600 hover:no-underline"
+             routerLinkActive="text-blue-600 font-semibold">Smartphones</a>
+          <a routerLink="/maschine" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600 hover:no-underline"
+             routerLinkActive="text-blue-600 font-semibold">Maschinen</a>
+        </div>
+      </div>
+
+      <!-- Systemübersicht -->
+      <div>
+        <button
+          (click)="toggleSection('system')"
+          class="flex items-center justify-between w-full px-3 py-2 rounded-lg hover:bg-blue-50 transition"
+        >
+          <div class="flex items-center gap-3">
+            <i class="fas fa-network-wired w-5 text-gray-500 mx-auto" [ngClass]="{ 'mx-0': isExpanded }"></i>
+            <span *ngIf="isExpanded" class="font-medium whitespace-nowrap">Systemübersicht</span>
+          </div>
+          <i
+            *ngIf="isExpanded"
+            class="fas fa-chevron-right text-sm transition-transform duration-300"
+            [class.rotate-90]="openSection === 'system'"
+          ></i>
+        </button>
+
+        <div
+          *ngIf="isExpanded && openSection === 'system'"
+          class="ml-8 mt-1 space-y-1"
+        >
+          <a routerLink="/einheiten" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600 hover:no-underline"
+             routerLinkActive="text-blue-600 font-semibold">Einheiten
+          </a>
+          <a routerLink="/zuweisungen" class="block px-2 py-1.5 text-gray-600 rounded-md hover:text-blue-600 hover:no-underline"
+             routerLinkActive="text-blue-600 font-semibold">Zuweisungen</a>
+        </div>
+      </div>
+
+      <!-- Sicherheitsereignisse -->
+      <a
+        routerLink="/ereignisse"
+        routerLinkActive="bg-blue-50 text-blue-600"
+        class="flex items-center justify-between w-full px-3 py-2 rounded-lg hover:bg-blue-50 transition hover:no-underline"
+      >
+        <div class="flex items-center gap-3">
+          <i class="fas fa-clock-rotate-left w-5 text-gray-500 mx-auto" [ngClass]="{ 'mx-0': isExpanded }"></i>
+          <span
+            *ngIf="isExpanded"
+            class="font-medium transition-opacity duration-300 whitespace-nowrap"
+          >Systemereignisse</span
+          >
+        </div>
+      </a>
+
+    </nav>
+
+    <div *ngIf="isExpanded" class="flex flex-col items-center border-t border-gray-100 p-4 space-y-2">
+      <div class="flex items-center gap-2">
+        <img src="Logo_of_Bosch_Rexroth_AG.png" alt="Rexroth Logo" class="h-8" />
+        <img src="HKA_horizontal.png" alt="HKA Logo" class="h-5" />
+      </div>
+      <p class="text-xs text-gray-400">© 2025 Bosch Rexroth AG</p>
+    </div>
+  </aside>
+
+
+  <!-- Hauptinhalt -->
+  <main class="flex-1 overflow-y-auto">
+    <router-outlet></router-outlet>
+  </main>
+</div>
